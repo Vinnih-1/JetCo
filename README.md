@@ -441,6 +441,7 @@ import com.developerstring.jetco_kmp.cards.ticket.TicketCard
 import com.developerstring.jetco_kmp.cards.curved.CurvedCard
 import com.developerstring.jetco_kmp.components.stepper.VerticalStepper
 import com.developerstring.jetco_kmp.components.button.SwitchButton
+import com.developerstring.jetco_kmp.components.search.animated_searchbar.AnimatedSearchBar
 
 // 🤖 For Android-only projects  
 import com.developerstring.jetco.ui.charts.piechart.PieChart
@@ -448,6 +449,7 @@ import com.developerstring.jetco.ui.cards.ticket.TicketCard
 import com.developerstring.jetco.ui.cards.curved.CurvedCard
 import com.developerstring.jetco.ui.components.stepper.VerticalStepper
 import com.developerstring.jetco.ui.components.button.SwitchButton
+import com.developerstring.jetco.ui.components.search.animated_searchbar.AnimatedSearchBar
 ```
 
 > 💡 **Note**: All components have **identical functionality and API** across both Android and KMP versions. Only the import path and Gradle dependency differ!
@@ -599,6 +601,41 @@ fun SwitchExample() {
             thumbColor = Color.White
         ),
         animationDuration = 300
+    )
+}
+```
+
+</details>
+
+<details>
+<summary><strong>Animated Search Bar</strong></summary>
+
+```kotlin
+@Composable
+fun AnimatedSearchBarPreview() {
+  val query by remember { mutableStateOf("") }
+  val controller = rememberAnimatedSearchBarController()
+  var isLoading by remember { mutableStateOf(false) } //to show loading animation when result are being searched
+
+  AnimatedSearchBar(
+        value = query,
+        onValueChange = { query = it },
+        controller = controller,
+        isLoading = isLoading, 
+        onSearch = { text ->
+            // trigger real search
+        },
+        config = AnimatedSearchBarConfig(
+            collapsedWidth = 56.dp,
+            expandedWidth = 300.dp,
+            height = 48.dp,
+            barBackgroundColor = Color.White,
+            barCornerRadius = 32.dp
+        ),
+        animationConfig = AnimatedSearchBarAnimationConfig(
+            widthSpringStiffness = Spring.StiffnessLow,
+            widthSpringDamping = Spring.DampingRatioMediumBouncy
+        )
     )
 }
 ```
