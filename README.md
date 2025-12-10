@@ -375,52 +375,6 @@ kotlin {
 
 <div align="center">
 
-## 📊 **UI Components Gallery**
-
-<p><strong>🎨 Rich, customizable components for every need</strong></p>
-
-</div>
-
-<div align="center">
-
-### 📈 **Charts & Data Visualization**
-
-| Component | Description | Platforms | Status |
-|:----------|:------------|:---------:|:------:|
-| **🥧 Pie Chart** | Interactive pie charts with customizable slices and animations | ![All Platforms](https://img.shields.io/badge/All-Platforms-success) | ✅ |
-| **📊 Column Bar Chart** | Beautiful vertical bar charts with smooth transitions | ![All Platforms](https://img.shields.io/badge/All-Platforms-success) | ✅ |
-| **🔥 Extended Bar Chart** | Advanced bar charts with multiple datasets and styling | ![All Platforms](https://img.shields.io/badge/All-Platforms-success) | ✅ |
-| **🤓 Group Bar Chart** | Side-by-side comparison charts for multi-series data | ![All Platforms](https://img.shields.io/badge/All-Platforms-success) | ✅ |
-
-### 🎴 **Cards & Layout**
-
-| Component | Description | Platforms | Status |
-|:----------|:------------|:---------:|:------:|
-| **🎟️ Ticket Card** | Cinema-style cards with cutout design and dashed dividers | ![All Platforms](https://img.shields.io/badge/All-Platforms-success) | ✅ |
-
-### 🔄 **Navigation & Progress**
-
-| Component | Description | Platforms | Status |
-|:----------|:------------|:---------:|:------:|
-| **⬇️ Vertical Stepper** | Timeline-style stepper with images and descriptions | ![All Platforms](https://img.shields.io/badge/All-Platforms-success) | ✅ |
-| **➡️ Horizontal Stepper** | Clean horizontal progress indicator | ![All Platforms](https://img.shields.io/badge/All-Platforms-success) | ✅ |
-| **⚡ Compact Stepper** | Minimal icon-only stepper for mobile interfaces | ![All Platforms](https://img.shields.io/badge/All-Platforms-success) | ✅ |
-
-### 🎛️ **Interactive Controls**
-
-| Component | Description | Platforms | Status |
-|:----------|:------------|:---------:|:------:|
-| **🔘 Switch Button** | Animated toggle switch with custom styling | ![All Platforms](https://img.shields.io/badge/All-Platforms-success) | ✅ |
-
-</div>
-
-
-> 🚧 **Coming Soon:** Date Pickers, Floating Action Buttons, Bottom Sheets, and more!
-  
----
-
-<div align="center">
-
 ## 🚀 **Getting Started**
 
 <p><strong>⚡ From zero to awesome in 5 minutes!</strong></p>
@@ -804,5 +758,23 @@ Check out our [Contributing Guide](https://jetco.developerstring.com/community) 
 <img src="https://img.shields.io/badge/License-Apache_2.0-green?style=flat"/>
 
 </div>
+
+<p align="center">
+  <img 
+    src="https://your-final-card-image-url.jpg"
+    alt="Contributors Card"
+    style="border-radius: 24px;"
+  />
+</p>
+
+<h2 align="center">Thanks to all our amazing contributors ✨</h2>
+
+<p align="center">
+  <a href="https://github.com/developerchunk/JetCo/graphs/contributors">
+    <img src="https://contrib.rocks/image?repo=developerchunk/JetCo" />
+  </a>
+</p>
+
+
 
 
