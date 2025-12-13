@@ -134,7 +134,7 @@ mavenPublishing {
 
     signAllPublications()
 
-    coordinates("com.developerstring.jetco-kmp", "ui", "1.0.0-beta.8")
+    coordinates("com.developerstring.jetco-kmp", "ui", "1.0.0-beta.9")
 
     pom {
         name = "JetCo"
