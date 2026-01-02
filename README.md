@@ -375,52 +375,6 @@ kotlin {
 
 <div align="center">
 
-## 📊 **UI Components Gallery**
-
-<p><strong>🎨 Rich, customizable components for every need</strong></p>
-
-</div>
-
-<div align="center">
-
-### 📈 **Charts & Data Visualization**
-
-| Component | Description | Platforms | Status |
-|:----------|:------------|:---------:|:------:|
-| **🥧 Pie Chart** | Interactive pie charts with customizable slices and animations | ![All Platforms](https://img.shields.io/badge/All-Platforms-success) | ✅ |
-| **📊 Column Bar Chart** | Beautiful vertical bar charts with smooth transitions | ![All Platforms](https://img.shields.io/badge/All-Platforms-success) | ✅ |
-| **🔥 Extended Bar Chart** | Advanced bar charts with multiple datasets and styling | ![All Platforms](https://img.shields.io/badge/All-Platforms-success) | ✅ |
-| **🤓 Group Bar Chart** | Side-by-side comparison charts for multi-series data | ![All Platforms](https://img.shields.io/badge/All-Platforms-success) | ✅ |
-
-### 🎴 **Cards & Layout**
-
-| Component | Description | Platforms | Status |
-|:----------|:------------|:---------:|:------:|
-| **🎟️ Ticket Card** | Cinema-style cards with cutout design and dashed dividers | ![All Platforms](https://img.shields.io/badge/All-Platforms-success) | ✅ |
-
-### 🔄 **Navigation & Progress**
-
-| Component | Description | Platforms | Status |
-|:----------|:------------|:---------:|:------:|
-| **⬇️ Vertical Stepper** | Timeline-style stepper with images and descriptions | ![All Platforms](https://img.shields.io/badge/All-Platforms-success) | ✅ |
-| **➡️ Horizontal Stepper** | Clean horizontal progress indicator | ![All Platforms](https://img.shields.io/badge/All-Platforms-success) | ✅ |
-| **⚡ Compact Stepper** | Minimal icon-only stepper for mobile interfaces | ![All Platforms](https://img.shields.io/badge/All-Platforms-success) | ✅ |
-
-### 🎛️ **Interactive Controls**
-
-| Component | Description | Platforms | Status |
-|:----------|:------------|:---------:|:------:|
-| **🔘 Switch Button** | Animated toggle switch with custom styling | ![All Platforms](https://img.shields.io/badge/All-Platforms-success) | ✅ |
-
-</div>
-
-
-> 🚧 **Coming Soon:** Date Pickers, Floating Action Buttons, Bottom Sheets, and more!
-  
----
-
-<div align="center">
-
 ## 🚀 **Getting Started**
 
 <p><strong>⚡ From zero to awesome in 5 minutes!</strong></p>
@@ -441,6 +395,7 @@ import com.developerstring.jetco_kmp.cards.ticket.TicketCard
 import com.developerstring.jetco_kmp.cards.curved.CurvedCard
 import com.developerstring.jetco_kmp.components.stepper.VerticalStepper
 import com.developerstring.jetco_kmp.components.button.SwitchButton
+import com.developerstring.jetco_kmp.components.search.animated_searchbar.AnimatedSearchBar
 
 // 🤖 For Android-only projects  
 import com.developerstring.jetco.ui.charts.piechart.PieChart
@@ -448,6 +403,7 @@ import com.developerstring.jetco.ui.cards.ticket.TicketCard
 import com.developerstring.jetco.ui.cards.curved.CurvedCard
 import com.developerstring.jetco.ui.components.stepper.VerticalStepper
 import com.developerstring.jetco.ui.components.button.SwitchButton
+import com.developerstring.jetco.ui.components.search.animated_searchbar.AnimatedSearchBar
 ```
 
 > 💡 **Note**: All components have **identical functionality and API** across both Android and KMP versions. Only the import path and Gradle dependency differ!
@@ -599,6 +555,41 @@ fun SwitchExample() {
             thumbColor = Color.White
         ),
         animationDuration = 300
+    )
+}
+```
+
+</details>
+
+<details>
+<summary><strong>Animated Search Bar</strong></summary>
+
+```kotlin
+@Composable
+fun AnimatedSearchBarPreview() {
+  val query by remember { mutableStateOf("") }
+  val controller = rememberAnimatedSearchBarController()
+  var isLoading by remember { mutableStateOf(false) } //to show loading animation when result are being searched
+
+  AnimatedSearchBar(
+        value = query,
+        onValueChange = { query = it },
+        controller = controller,
+        isLoading = isLoading, 
+        onSearch = { text ->
+            // trigger real search
+        },
+        config = AnimatedSearchBarConfig(
+            collapsedWidth = 56.dp,
+            expandedWidth = 300.dp,
+            height = 48.dp,
+            barBackgroundColor = Color.White,
+            barCornerRadius = 32.dp
+        ),
+        animationConfig = AnimatedSearchBarAnimationConfig(
+            widthSpringStiffness = Spring.StiffnessLow,
+            widthSpringDamping = Spring.DampingRatioMediumBouncy
+        )
     )
 }
 ```
@@ -767,5 +758,23 @@ Check out our [Contributing Guide](https://jetco.developerstring.com/community) 
 <img src="https://img.shields.io/badge/License-Apache_2.0-green?style=flat"/>
 
 </div>
+
+<p align="center">
+  <img 
+    src="https://your-final-card-image-url.jpg"
+    alt="Contributors Card"
+    style="border-radius: 24px;"
+  />
+</p>
+
+<h2 align="center">Thanks to all our amazing contributors ✨</h2>
+
+<p align="center">
+  <a href="https://github.com/developerchunk/JetCo/graphs/contributors">
+    <img src="https://contrib.rocks/image?repo=developerchunk/JetCo" />
+  </a>
+</p>
+
+
 
 
