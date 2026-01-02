@@ -14,8 +14,7 @@ import androidx.compose.ui.unit.sp
  * @param fontFamily Custom font family for input text.
  * @param fontWeight Custom font weight for input text.
  * @param letterSpacing Letter spacing for input text.
- * @param focusedTextColor Text color when the search bar is focused.
- * @param unfocusedTextColor Text color when the search bar is not focused.
+ * @param inputTextColor Text color for the search bar input text.
  * @param placeholderTextStyle Text style for the placeholder (size, line height, etc.).
  * @param placeholderFontFamily Custom font family for placeholder text.
  * @param placeholderFontWeight Custom font weight for placeholder text.
@@ -28,7 +27,7 @@ import androidx.compose.ui.unit.sp
  *     fontFamily = FontFamily.SansSerif,
  *     fontWeight = FontWeight.Medium,
  *     letterSpacing = 0.5.sp,
- *     focusedTextColor = Color.Black,
+ *     inputTextColor = Color.Black,
  *     placeholderTextColor = Color.Black,
  *     cursorColor = Color.Blue
  * )
@@ -45,8 +44,7 @@ data class AnimatedSearchBarTextConfig(
     val fontFamily: FontFamily? = null,
     val fontWeight: FontWeight? = null,
     val letterSpacing: TextUnit = TextUnit.Unspecified,
-    val focusedTextColor: Color = Color.Black,
-    val unfocusedTextColor: Color = Color.DarkGray,
+    val inputTextColor: Color = Color.Black,
     val placeholderTextStyle: TextStyle = TextStyle(
         fontSize = 16.sp, lineHeight = 18.sp
     ),

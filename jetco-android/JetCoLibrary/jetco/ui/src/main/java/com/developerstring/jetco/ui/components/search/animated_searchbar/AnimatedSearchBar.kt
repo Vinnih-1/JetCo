@@ -146,8 +146,6 @@ fun AnimatedSearchBar(
 
     val scope = rememberCoroutineScope()
 
-    var isFocused by remember { mutableStateOf(false) }
-
     fun triggerSearchIconBounceAnimation() {
         scope.launch {
             iconScale.animateTo(
@@ -191,12 +189,6 @@ fun AnimatedSearchBar(
     )
 
     val focusManager = LocalFocusManager.current
-
-    val currentTextColor = if (isFocused) {
-        textConfig.focusedTextColor
-    } else {
-        textConfig.unfocusedTextColor
-    }
 
     LaunchedEffect(Unit) {
         controller.collapseRequest = {
@@ -281,9 +273,7 @@ fun AnimatedSearchBar(
                     BasicTextField(
                         value = value,
                         onValueChange = { onValueChange(it) },
-                        modifier = Modifier
-                            .weight(1f)
-                            .onFocusChanged { isFocused = it.isFocused },
+                        modifier = Modifier.weight(1f),
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                         keyboardActions = KeyboardActions(
@@ -292,7 +282,7 @@ fun AnimatedSearchBar(
                                 focusManager.clearFocus()
                             }),
                         textStyle = textConfig.textStyle.copy(
-                            color = currentTextColor,
+                            color = textConfig.inputTextColor,
                             fontFamily = textConfig.fontFamily ?: textConfig.textStyle.fontFamily,
                             fontWeight = textConfig.fontWeight ?: textConfig.textStyle.fontWeight,
                             letterSpacing = textConfig.letterSpacing,
