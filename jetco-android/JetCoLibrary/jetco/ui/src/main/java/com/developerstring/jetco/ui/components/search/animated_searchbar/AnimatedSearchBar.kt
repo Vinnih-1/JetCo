@@ -47,6 +47,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalFocusManager
@@ -135,6 +136,7 @@ fun AnimatedSearchBar(
     modifier: Modifier = Modifier,
     config: AnimatedSearchBarConfig = AnimatedSearchBarConfig(),
     animationConfig: AnimatedSearchBarAnimationConfig = AnimatedSearchBarAnimationConfig(),
+    textConfig: AnimatedSearchBarTextConfig = AnimatedSearchBarTextConfig(),
     isLoading: Boolean = false,
     onSearch: (String) -> Unit = {},
     onExpand: () -> Unit = {},
@@ -146,6 +148,8 @@ fun AnimatedSearchBar(
     val iconScale = remember { Animatable(1f) }
 
     val scope = rememberCoroutineScope()
+
+    var isFocused by remember { mutableStateOf(false) }
 
     fun triggerSearchIconBounceAnimation() {
         scope.launch {
@@ -190,6 +194,12 @@ fun AnimatedSearchBar(
     )
 
     val focusManager = LocalFocusManager.current
+
+    val currentTextColor = if (isFocused) {
+        textConfig.focusedTextColor
+    } else {
+        textConfig.unfocusedTextColor
+    }
 
     LaunchedEffect(Unit) {
         controller.collapseRequest = {
@@ -274,7 +284,9 @@ fun AnimatedSearchBar(
                     BasicTextField(
                         value = value,
                         onValueChange = { onValueChange(it) },
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier
+                            .weight(1f)
+                            .onFocusChanged{ isFocused = it.isFocused },
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                         keyboardActions = KeyboardActions(
@@ -282,10 +294,13 @@ fun AnimatedSearchBar(
                                 onSearch(value)
                                 focusManager.clearFocus()
                             }),
-                        textStyle = TextStyle(
-                            color = Color.Black, fontSize = 16.sp, lineHeight = 18.sp
+                        textStyle = textConfig.textStyle.copy(
+                            color = currentTextColor,
+                            fontFamily = textConfig.fontFamily ?: textConfig.textStyle.fontFamily,
+                            fontWeight = textConfig.fontWeight ?: textConfig.textStyle.fontWeight,
+                            letterSpacing = textConfig.letterSpacing,
                         ),
-                        cursorBrush = SolidColor(Color.DarkGray),
+                        cursorBrush = SolidColor(textConfig.cursorColor),
                         decorationBox = { innerTextField ->
                             if (value.isEmpty()) {
                                 Box(
@@ -293,8 +308,12 @@ fun AnimatedSearchBar(
                                 ) {
                                     Text(
                                         config.placeholderTextString,
-                                        color = config.placeholderTextColor,
-                                        fontSize = 16.sp,
+                                        style = textConfig.placeholderTextStyle.copy(
+                                            color = textConfig.placeholderTextColor,
+                                            fontFamily = textConfig.placeholderFontFamily ?: textConfig.placeholderTextStyle.fontFamily,
+                                            fontWeight = textConfig.placeholderFontWeight ?: textConfig.placeholderTextStyle.fontWeight,
+                                            letterSpacing = textConfig.letterSpacing
+                                        ),
                                         modifier = Modifier.padding(start = 2.dp)
                                     )
                                 }
