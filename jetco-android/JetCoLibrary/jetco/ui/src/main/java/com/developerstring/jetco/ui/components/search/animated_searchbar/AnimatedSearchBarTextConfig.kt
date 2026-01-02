@@ -23,25 +23,24 @@ import androidx.compose.ui.unit.sp
  * @param cursorColor Color of the text cursor.
  *
  * Example:
-    * ```kotlin
-    * AnimatedSearchBarTextConfig(
-    *     fontFamily = FontFamily.SansSerif,
-    *     fontWeight = FontWeight.Medium,
-    *     letterSpacing = 0.5.sp,
-    *     focusedTextColor = Color.Black,
-    *     placeholderTextColor = Color.Black,
-    *     cursorColor = Color.Blue
-    * )
-    * ```
+ * ```kotlin
+ * AnimatedSearchBarTextConfig(
+ *     fontFamily = FontFamily.SansSerif,
+ *     fontWeight = FontWeight.Medium,
+ *     letterSpacing = 0.5.sp,
+ *     focusedTextColor = Color.Black,
+ *     placeholderTextColor = Color.Black,
+ *     cursorColor = Color.Blue
+ * )
+ * ```
  *
  *  @see AnimatedSearchBarConfig for appearance configuration options
  *  @see AnimatedSearchBarAnimationConfig for animation configuration options
  */
 
-data class AnimatedSearchBarTextConfig (
+data class AnimatedSearchBarTextConfig(
     val textStyle: TextStyle = TextStyle(
-        fontSize = 16.sp,
-        lineHeight = 18.sp
+        fontSize = 16.sp, lineHeight = 18.sp
     ),
     val fontFamily: FontFamily? = null,
     val fontWeight: FontWeight? = null,
@@ -49,8 +48,7 @@ data class AnimatedSearchBarTextConfig (
     val focusedTextColor: Color = Color.Black,
     val unfocusedTextColor: Color = Color.DarkGray,
     val placeholderTextStyle: TextStyle = TextStyle(
-        fontSize = 16.sp,
-        lineHeight = 18.sp
+        fontSize = 16.sp, lineHeight = 18.sp
     ),
     val placeholderFontFamily: FontFamily? = null,
     val placeholderFontWeight: FontWeight? = null,

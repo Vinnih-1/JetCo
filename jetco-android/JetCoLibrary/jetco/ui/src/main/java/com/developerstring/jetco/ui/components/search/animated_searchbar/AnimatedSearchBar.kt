@@ -48,13 +48,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 
 /**
@@ -286,7 +283,7 @@ fun AnimatedSearchBar(
                         onValueChange = { onValueChange(it) },
                         modifier = Modifier
                             .weight(1f)
-                            .onFocusChanged{ isFocused = it.isFocused },
+                            .onFocusChanged { isFocused = it.isFocused },
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                         keyboardActions = KeyboardActions(
@@ -310,8 +307,10 @@ fun AnimatedSearchBar(
                                         config.placeholderTextString,
                                         style = textConfig.placeholderTextStyle.copy(
                                             color = textConfig.placeholderTextColor,
-                                            fontFamily = textConfig.placeholderFontFamily ?: textConfig.placeholderTextStyle.fontFamily,
-                                            fontWeight = textConfig.placeholderFontWeight ?: textConfig.placeholderTextStyle.fontWeight,
+                                            fontFamily = textConfig.placeholderFontFamily
+                                                ?: textConfig.placeholderTextStyle.fontFamily,
+                                            fontWeight = textConfig.placeholderFontWeight
+                                                ?: textConfig.placeholderTextStyle.fontWeight,
                                             letterSpacing = textConfig.letterSpacing
                                         ),
                                         modifier = Modifier.padding(start = 2.dp)
