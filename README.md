@@ -182,7 +182,7 @@ graph TB
       <br/><sub>Creative card layouts</sub>
     </td>
     <td align="center">
-      <img src="https://github.com/amanna13/JetCo/blob/feature/animated-search-bar-component/assets/images/AnimatedSearchBar.gif" width="280" style="border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"/>
+      <img src="https://github.com/developerchunk/JetCo/blob/main/assets/images/AnimatedSearchBar.gif?raw=true" width="280" style="border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"/>
        <br/><strong>🔍 Animated Search Bar</strong>
       <br/><sub>Customized Animated Search Bar</sub>
     </td>
@@ -414,8 +414,6 @@ kotlin {
 
 </div>
 
-> [!NOTE]
-> Animated Search Bar is now available for Android. KMP support coming soon!
 
 > 🚧 **Coming Soon:** Date Pickers, Floating Action Buttons, Bottom Sheets, and more!
   
