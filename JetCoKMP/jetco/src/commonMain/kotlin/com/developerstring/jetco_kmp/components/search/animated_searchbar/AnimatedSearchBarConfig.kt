@@ -36,8 +36,6 @@ import androidx.compose.ui.unit.dp
  *
  * @param clearIconTint Tint color for the clear (✕) icon shown when expanded.
  *
- * @param placeholderTextColor Color used for placeholder text in the input field.
- *
  * @param placeholderTextString Text displayed when the input field is empty. Default is "Search".
  *
  * Example:
@@ -52,6 +50,7 @@ import androidx.compose.ui.unit.dp
  * ```
  *
  * @see AnimatedSearchBar for usage
+ * @see AnimatedSearchBarTextConfig for text configuration options
  * @see AnimatedSearchBarAnimationConfig for animation configuration options
  */
 
@@ -68,7 +67,5 @@ data class AnimatedSearchBarConfig(
     val iconBackgroundColor: Color = Color(0xFF558B2F),
     val iconTint: Color = Color.White,
     val clearIconTint: Color = Color.Black,
-    val placeholderTextColor: Color = Color.Black,
     val placeholderTextString: String = "Search"
 )
-

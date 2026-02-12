@@ -217,7 +217,26 @@ private fun PieChartItems(
     ) {
         data.forEach { item ->
 
-            val decimalFormat = item.value.toString().replace(".0", "")
+            val decimalFormat = run {
+                val v = item.value
+                if (v.isNaN() || v.isInfinite()) "0"
+                else {
+                    val rounded = kotlin.math.round(v * 100) / 100
+                    val longVal = rounded.toLong()
+                    if (rounded == longVal.toFloat()) longVal.toString()
+                    else {
+                        val absR = kotlin.math.round(kotlin.math.abs(v) * 100).toLong()
+                        val intP = absR / 100
+                        val decP = (absR % 100).toInt()
+                        val prefix = if (v < 0f && (intP > 0 || decP > 0)) "-" else ""
+                        when {
+                            decP == 0 -> "$prefix$intP"
+                            decP % 10 == 0 -> "$prefix$intP.${decP / 10}"
+                            else -> "$prefix$intP.${decP.toString().padStart(2, '0')}"
+                        }
+                    }
+                }
+            }
 
             SuggestionChip(
                 onClick = {

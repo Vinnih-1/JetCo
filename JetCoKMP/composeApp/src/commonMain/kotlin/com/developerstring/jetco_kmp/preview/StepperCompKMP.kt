@@ -198,7 +198,8 @@ fun StepperPreview() {
                     completed = Icons.Filled.FavoriteBorder,
                     error = Icons.Filled.Info,
                     active = Icons.Rounded.Notifications
-                )
+                ),
+
             )
         }
     }

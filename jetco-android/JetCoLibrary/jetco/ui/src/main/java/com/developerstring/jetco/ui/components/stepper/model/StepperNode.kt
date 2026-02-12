@@ -1,5 +1,6 @@
 package com.developerstring.jetco.ui.components.stepper.model
 
+import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 
@@ -11,6 +12,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
  * @property icon Optional custom icon for the step (fallbacks to default icons if null).
  * @property status Current status of the step (idle, active, completed, or error).
  */
+@Stable
 data class StepperNode(
     val title: String? = null,
     val description: String? = null,

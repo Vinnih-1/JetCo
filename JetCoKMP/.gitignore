@@ -17,27 +17,7 @@ captures
 !*.xcworkspace/contents.xcworkspacedata
 **/xcshareddata/WorkspaceSettings.xcsettings
 node_modules/
-/build
-/jetco/build
-
-# Sensitive files
 gradle.properties
-local.properties
-*.keystore
-*.jks
-*.key
-*.p12
-release.keystore
-debug.keystore
-
-# Environment files
-.env
-.env.local
-.env.production
-.env.staging
-
-# API Keys and credentials
-**/keys/
-**/secrets/
-api_keys.txt
-config.properties
+/build
+/gradle.properties
+/jetco/build

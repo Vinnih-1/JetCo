@@ -4,6 +4,7 @@ import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.RectangleShape
@@ -34,6 +35,7 @@ import com.developerstring.jetco.ui.components.stepper.HorizontalStepper
  * )
  * ```
  */
+@Stable
 data class StepperConfig(
     val node: NodeStyle = NodeStyle(),
     val connector: ConnectorStyle = ConnectorStyle(),
@@ -53,6 +55,7 @@ data class StepperConfig(
      * @property internalSpacing Spacing between the node and the content.
      * @property horizontalStepperWidth minimum width for each [HorizontalStepper] item.
      */
+    @Stable
     data class NodeStyle(
         val activeColor: Color = Color(0xFF1976D2),
         val completedColor: Color = Color(0xFF4CAF50),
@@ -75,6 +78,7 @@ data class StepperConfig(
      * @property lineLengthMin Minimum line length (prevents overlap in dense layouts).
      * @property pathEffect Optional dash effect for incomplete connectors.
      */
+    @Stable
     data class ConnectorStyle(
         val width: Dp = 2.dp,
         val spacing: Dp = 8.dp,
@@ -91,6 +95,7 @@ data class StepperConfig(
      * @property titleTextStyle Style applied to step titles.
      * @property descriptionTextStyle Style applied to step descriptions.
      */
+    @Stable
     data class TextStyleConfig(
         val maxTitleLines: Int = 2,
         val maxDescriptionLines: Int = 3,
@@ -106,6 +111,7 @@ data class StepperConfig(
      * @property durationMillis Duration of node/connector animations in milliseconds.
      * @property animationSpec The animation specification to use (default: tween with [durationMillis]).
      */
+    @Stable
     data class AnimationConfig(
         val enabled: Boolean = true,
         val durationMillis: Int = 1200,
@@ -120,6 +126,7 @@ data class StepperConfig(
      * @property maxHeight Maximum height of the image.
      * @property contentScale How the image should be scaled to fit within its bounds.
      */
+    @Stable
     data class ImageConfig(
         val maxWidth: Dp? = null,
         val maxHeight: Dp? = null,

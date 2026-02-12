@@ -1,8 +1,2 @@
 /.gradle
 /build
-
-# Library sensitive files
-gradle.properties
-local.properties
-*.keystore
-*.jks

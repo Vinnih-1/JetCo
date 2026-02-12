@@ -15,7 +15,6 @@ import androidx.compose.ui.unit.Dp
  * @property width The width of the bar.
  * @property shape The shape of the bar (e.g., rounded corners).
  */
-@Stable
 data class BarChartConfig(
     val color: Color,
     val height: Dp,
@@ -33,7 +32,6 @@ data class BarChartConfig(
  * @property gapBetweenBar The gap between individual bars within a group.
  * @property gapBetweenGroup The gap between different groups of bars.
  */
-@Stable
 data class GroupBarChartConfig(
     val colors: List<Color>,
     val height: Dp,
@@ -53,7 +51,6 @@ data class GroupBarChartConfig(
 * @property axisLineColor The color of the axis line.
 * @property textStyle The [TextStyle] of the text for axis labels.
 */
-@Stable
 data class XAxisConfig(
     val isAxisScaleEnabled: Boolean,
     val isAxisLineEnabled: Boolean,
@@ -76,7 +73,6 @@ data class XAxisConfig(
  * @property textPrefix The prefix to be added before the scale value.
  * @property textPostfix The postfix to be added after the scale value.
  */
-@Stable
 data class YAxisConfig(
     val isAxisScaleEnabled: Boolean,
     val isAxisLineEnabled: Boolean,
