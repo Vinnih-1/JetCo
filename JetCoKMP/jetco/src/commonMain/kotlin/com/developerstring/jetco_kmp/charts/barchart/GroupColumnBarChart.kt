@@ -28,6 +28,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import com.developerstring.jetco_kmp.charts.barchart.components.formatScaleValue
 import androidx.compose.ui.unit.dp
 import com.developerstring.jetco_kmp.charts.barchart.components.BarChartPopup
 import com.developerstring.jetco_kmp.charts.barchart.components.XAxisLabel
@@ -206,7 +207,7 @@ fun GroupColumnBarChart(
                                             if (isBarPopupVisible && popUpConfig.enableBarPopUp) {
                                                 BarChartPopup(
                                                     popUpConfig = popUpConfig,
-                                                    text = barPopupText.toString(),
+                                                    text = formatScaleValue(barPopupText),
                                                     onDismissRequest = {
                                                         isBarPopupVisible = false
                                                     }

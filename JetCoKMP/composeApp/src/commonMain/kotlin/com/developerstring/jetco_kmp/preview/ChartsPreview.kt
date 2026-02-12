@@ -138,8 +138,10 @@ fun ChartsCMPPreview() {
             // Custom bar design for the chart, with each bar formatted as a card
             barDesign = { text ->
 
-                val value = text.toDouble()
-                val formatted = if (value % 1 == 0.0) value.toInt().toString() else value.toString()
+                val value = text.toDoubleOrNull() ?: 0.0
+                val formatted = if (value.isNaN() || value.isInfinite()) "0"
+                    else if (value % 1 == 0.0) value.toInt().toString()
+                    else value.toString()
 
                 Card(
                     modifier = Modifier.fillMaxSize(),
@@ -187,8 +189,10 @@ fun ChartsCMPPreview() {
             },
             barDesign = { text ->
 
-                val value = text.toDouble()
-                val formatted = if (value % 1 == 0.0) value.toInt().toString() else value.toString()
+                val value = text.toDoubleOrNull() ?: 0.0
+                val formatted = if (value.isNaN() || value.isInfinite()) "0"
+                    else if (value % 1 == 0.0) value.toInt().toString()
+                    else value.toString()
 
                 Card(
                     modifier = Modifier.fillMaxSize(),
@@ -250,8 +254,10 @@ fun ChartsCMPPreview() {
 
             // Custom bar design for the chart, with each bar formatted as a card
             barDesign = { text ->
-                val value = text.toDouble()
-                val formatted = if (value % 1 == 0.0) value.toInt().toString() else value.toString()
+                val value = text.toDoubleOrNull() ?: 0.0
+                val formatted = if (value.isNaN() || value.isInfinite()) "0"
+                    else if (value % 1 == 0.0) value.toInt().toString()
+                    else value.toString()
 
                 Card(
                     modifier = Modifier.fillMaxSize(),

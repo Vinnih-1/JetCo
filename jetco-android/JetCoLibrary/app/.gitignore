@@ -1,15 +1,1 @@
 /build
-
-# App-specific sensitive files
-google-services.json
-GoogleService-Info.plist
-*.keystore
-*.jks
-release/
-debug/
-proguard/
-mapping.txt
-
-# API Keys
-api_keys.properties
-config.properties

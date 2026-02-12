@@ -5,7 +5,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.ui.graphics.Color
-import com.developerstring.jetco_library.kmp.SwitchButtonKMP
 import com.developerstring.jetco_library.ui.theme.JetCoLibraryTheme
 
 val UIBlue = Color(0xFF1E90FF)
@@ -18,7 +17,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             JetCoLibraryTheme {
-                AnimatedSearchBarPreview()
+                LineGraphScreen()
             }
         }
     }

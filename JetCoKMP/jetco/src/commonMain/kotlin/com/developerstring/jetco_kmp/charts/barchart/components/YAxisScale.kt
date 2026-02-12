@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.developerstring.jetco_kmp.charts.barchart.config.YAxisConfig
 import kotlin.math.abs
+import kotlin.math.round
 
 /**
  * A composable function that displays the Y-axis scale labels and an optional Y-axis line for a chart.
@@ -45,7 +46,7 @@ fun YAxisScale(
                     verticalAlignment = Alignment.Bottom
                 ) {
                     Text(
-                        text = yAxisConfig.textPrefix + yAxisScaleStep * barScale + yAxisConfig.textPostfix,
+                        text = yAxisConfig.textPrefix + formatScaleValue(yAxisScaleStep * barScale) + yAxisConfig.textPostfix,
                         style = yAxisConfig.textStyle
                     )
                 }
@@ -81,25 +82,37 @@ fun YAxisScale(
  * @return A formatted string representing the value with appropriate suffixes for readability.
  */
 fun formatScaleValue(value: Float): String {
+    if (value.isNaN() || value.isInfinite()) return "0"
 
-    // Defines the decimal format to display up to two decimal places
-
-    // For values less than 10,000, display the value as is
-    if (value < 10000) {
-        return if (value % 1f == 0.0f) value.toInt().toString() else value.toString()
+    if (abs(value) < 10000) {
+        return formatBarDecimal(value)
     }
 
     val am: Float
-    // For values in millions, format the value with an "M" suffix
-    if (abs(value / 1000000) >= 1) {
-        am = value / 1000000
-        return if (am % 1f == 0.0f) am.toInt().toString() else am.toString() + "M"
-    } else if (abs(value / 1000) >= 1) { // For values in thousands, format the value with a "K" suffix
-        am = value / 1000
-        return if (am % 1f == 0.0f) am.toInt().toString() else am.toString() + "K"
-    } else {
-        // Default case, return the formatted value without suffix
-        return if (value % 1f == 0.0f) value.toInt().toString() else value.toString()
+    if (abs(value / 1_000_000) >= 1) {
+        am = value / 1_000_000
+        return formatBarDecimal(am) + "M"
+    } else if (abs(value / 1_000) >= 1) {
+        am = value / 1_000
+        return formatBarDecimal(am) + "K"
     }
+    return formatBarDecimal(value)
+}
 
+/**
+ * NaN-safe decimal formatting using integer arithmetic.
+ * Produces at most 2 decimal places, removing trailing zeros.
+ */
+private fun formatBarDecimal(value: Float): String {
+    if (value.isNaN() || value.isInfinite()) return "0"
+    val negative = value < 0f
+    val absRounded = round(abs(value) * 100).toLong()
+    val intPart = absRounded / 100
+    val decPart = (absRounded % 100).toInt()
+    val prefix = if (negative && (intPart > 0 || decPart > 0)) "-" else ""
+    return when {
+        decPart == 0 -> "$prefix$intPart"
+        decPart % 10 == 0 -> "$prefix$intPart.${decPart / 10}"
+        else -> "$prefix$intPart.${decPart.toString().padStart(2, '0')}"
+    }
 }

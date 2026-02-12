@@ -69,4 +69,3 @@ data class AnimatedSearchBarConfig(
     val clearIconTint: Color = Color.Black,
     val placeholderTextString: String = "Search"
 )
-

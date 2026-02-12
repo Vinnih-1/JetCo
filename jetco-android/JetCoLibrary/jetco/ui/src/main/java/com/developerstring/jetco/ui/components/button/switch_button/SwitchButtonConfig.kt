@@ -3,6 +3,7 @@ package com.developerstring.jetco.ui.components.button.switch_button
 import androidx.compose.animation.core.Easing
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
@@ -20,6 +21,7 @@ import androidx.compose.ui.unit.dp
  * @property innerBoxColor Color of the inner knob that moves on toggle.
  * @property innerBoxShape Shape of the inner knob.
  */
+@Stable
 data class SwitchButtonConfig(
     val selectedBackgroundColor: Color = Color(0xFF1E90FF),
     val unSelectedBackgroundColor: Color = Color(0xFF636B7B),
@@ -46,6 +48,7 @@ data class SwitchButtonConfig(
  * )
  * ```
  */
+@Stable
 data class SwitchButtonAnimation(
     val animationDuration: Int = 700,
     val animationDelay: Int = 0,

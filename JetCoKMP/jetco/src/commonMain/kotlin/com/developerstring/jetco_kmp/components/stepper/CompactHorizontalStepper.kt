@@ -93,7 +93,7 @@ fun CompactHorizontalStepper(
         // Trigger animation on composition
         animationTriggered = true
     }
-    
+
     Row(
         modifier = modifier
             .fillMaxWidth()

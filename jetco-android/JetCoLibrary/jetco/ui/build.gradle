@@ -1,7 +1,7 @@
 import com.android.tools.build.jetifier.core.utils.Log
 
 /*
- * Copyright 2024 by Developer Chunk.
+ * Copyright 2026 by Developer Chunk.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,7 +62,7 @@ afterEvaluate {
 
             name = "JetCo"
             description = "A versatile Jetpack Compose library for building modern UI for your Android Apps."
-            inceptionYear = "2025"
+            inceptionYear = "2026"
             url = "https://github.com/developerchunk/jetco/"
             licenses {
                 license {

@@ -34,6 +34,7 @@ import com.developerstring.jetco_kmp.charts.barchart.components.BarChartPopup
 import com.developerstring.jetco_kmp.charts.barchart.components.XAxisLabel
 import com.developerstring.jetco_kmp.charts.barchart.components.YAxisGridLines
 import com.developerstring.jetco_kmp.charts.barchart.components.YAxisScale
+import com.developerstring.jetco_kmp.charts.barchart.components.formatScaleValue
 import com.developerstring.jetco_kmp.charts.barchart.config.BarChartConfig
 import com.developerstring.jetco_kmp.charts.barchart.config.BarChartDefaults
 import com.developerstring.jetco_kmp.charts.barchart.config.GridLineStyle
@@ -147,7 +148,7 @@ fun ExtendedColumnBarChart(
                                         modifier = Modifier.height(height = yAxisStepHeight),
                                         verticalAlignment = Alignment.Bottom
                                     ) {
-                                        yAxisScaleLabel((yAxisScaleStep * barScale).toString())
+                                        yAxisScaleLabel(formatScaleValue(yAxisScaleStep * barScale))
                                     }
                                 }
                             }
@@ -239,12 +240,12 @@ fun ExtendedColumnBarChart(
                                                 isBarPopupVisible = false
                                             },
                                         ) {
-                                            barPopUp(barPopupText.toString())
+                                            barPopUp(formatScaleValue(barPopupText))
                                         }
                                     } else {
                                         BarChartPopup(
                                             popUpConfig = popUpConfig,
-                                            text = barPopupText.toString(),
+                                            text = formatScaleValue(barPopupText),
                                             onDismissRequest = {
                                                 isBarPopupVisible = false
                                             }
@@ -311,7 +312,7 @@ fun ExtendedColumnBarChart(
                                                 contentAlignment = Alignment.BottomCenter
                                             ) {
 
-                                                barDesign(barItem.value.toString())
+                                                barDesign(formatScaleValue(barItem.value))
 
                                             }
                                         } else {

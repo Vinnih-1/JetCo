@@ -71,6 +71,7 @@ kotlin {
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation(libs.material.icons.extended)
+            implementation(libs.kotlinx.datetime)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -134,12 +135,12 @@ mavenPublishing {
 
     signAllPublications()
 
-    coordinates("com.developerstring.jetco-kmp", "ui", "1.0.0-beta.9")
+    coordinates("com.developerstring.jetco-kmp", "ui", "1.1.0-beta")
 
     pom {
         name = "JetCo"
         description = "A versatile Jetpack Compose library for building modern UI for your KMP Apps."
-        inceptionYear = "2025"
+        inceptionYear = "2026"
         url = "https://github.com/developerchunk/jetco/"
         licenses {
             license {

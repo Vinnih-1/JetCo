@@ -28,8 +28,11 @@ fun GridLine(
         val gapLengthPx = gridLineStyle.gapLength.toPx()
         val strokeWidthPx = gridLineStyle.strokeWidth.toPx()
 
-        // Define the PathEffect to create dashes
-        val pathEffect = PathEffect.dashPathEffect(floatArrayOf(dashLengthPx, gapLengthPx), 0f)
+        // Skia's MakeDash requires all intervals > 0; passing 0 returns
+        // nullptr which crashes on Kotlin/Native ("Can't wrap nullptr").
+        val pathEffect = if (dashLengthPx > 0f && gapLengthPx > 0f) {
+            PathEffect.dashPathEffect(floatArrayOf(dashLengthPx, gapLengthPx), 0f)
+        } else null
 
         // Draw the dashed line
         drawLine(
