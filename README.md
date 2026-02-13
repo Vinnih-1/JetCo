@@ -12,13 +12,6 @@
 
 <br/>
 
-<div style="display: inline-block; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 16px; box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);">
-  <p style="margin: 0; color: white; font-size: 18px; font-weight: 600; letter-spacing: 0.5px;">
-    Beautiful •  Fast •  Cross-Platform •  Fully Customizable
-  </p>
-</div>
-
-<br/>
 <br/>
 
 <p style="font-size: 16px; line-height: 1.8; color: #4a5568; max-width: 800px; margin: 0 auto;">
@@ -34,8 +27,6 @@ Your ultimate <strong>Open-Source</strong> partner for crafting visually stunnin
   <a href="https://central.sonatype.com/artifact/com.developerstring.jetco/ui">
     <img src="https://img.shields.io/maven-central/v/com.developerstring.jetco/ui?style=flat-square&logo=apache-maven&color=orange" alt="Maven">
   </a>
-  <img src="https://img.shields.io/github/stars/developerchunk/jetco?style=flat-square&logo=github&color=yellow" alt="Stars">
-  <img src="https://img.shields.io/github/license/developerchunk/jetco?style=flat-square&color=green" alt="License">
 </p>
 
 <br/>
@@ -72,8 +63,8 @@ Your ultimate <strong>Open-Source</strong> partner for crafting visually stunnin
       <strong>Multi Line Graph</strong>
     </td>
     <td align="center" width="25%">
-      <img src="https://github.com/developerchunk/JetCo/blob/main/assets/images/candlestick_graph.png?raw=true" alt="Candlestick Graph" width="100%" style="border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.12);"/>
-      <br/><br/>
+      <img src="https://github.com/developerchunk/JetCo/blob/main/assets/images/candlestick_chart.png?raw=true" alt="Candlestick Graph" width="100%" style="border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.12);"/>
+      <br/><br/> 
       <strong>Candlestick Chart</strong>
     </td>
     <td align="center" width="25%">
