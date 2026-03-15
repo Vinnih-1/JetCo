@@ -112,7 +112,7 @@ fun CompactHorizontalStepper(
             // Node
             Card(
                 modifier = Modifier
-                    .size(24.dp)
+                    .size(style.node.size)
                     .clip(CircleShape),
                 colors = CardDefaults.cardColors(containerColor = nodeColor),
                 onClick = { onStepClick?.invoke(index) }
