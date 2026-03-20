@@ -45,6 +45,7 @@ data class FabMainConfig(
         val shape: Shape = CircleShape,
         val horizontalSpace: Dp = 12.dp,
         val size: Dp = 72.dp,
+        val iconRotation: Float = 45f,
         val padding: PaddingValues = PaddingValues()
     )
 

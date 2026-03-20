@@ -15,14 +15,13 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.developerstring.jetco.ui.components.button.fab.base.BaseFloatingActionButton
 import com.developerstring.jetco.ui.components.button.fab.components.SubFabItem
-import com.developerstring.jetco.ui.components.button.fab.model.FabSubItem
 import com.developerstring.jetco.ui.components.button.fab.model.FabMainConfig
+import com.developerstring.jetco.ui.components.button.fab.model.FabSubItem
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.cos
@@ -37,13 +36,6 @@ fun RadialFloatingActionButton(
     icon: (@Composable () -> Unit)? = null,
     config: FabMainConfig = FabMainConfig()
 ) {
-    // Rotate the main icon smoothly when toggling open/close
-    val mainIconRotation by animateFloatAsState(
-        targetValue = if (expanded) 45f else 0f,
-        animationSpec = config.animation.animationSpec,
-        label = "mainIconRotation"
-    )
-
     Box(
         modifier = modifier
     ) {
@@ -104,11 +96,11 @@ fun RadialFloatingActionButton(
 
         // Main FAB button
         BaseFloatingActionButton(
+            expanded = expanded,
             text = null,
             icon = icon,
             onClick = onClick,
-            config = config,
-            modifier = Modifier.rotate(mainIconRotation)
+            config = config
         )
     }
 }
