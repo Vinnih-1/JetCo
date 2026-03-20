@@ -4,6 +4,7 @@ import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.Easing
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.Color
@@ -44,6 +45,7 @@ data class FabMainConfig(
         val shape: Shape = CircleShape,
         val horizontalSpace: Dp = 12.dp,
         val size: Dp = 72.dp,
+        val padding: PaddingValues = PaddingValues()
     )
 
     @Stable

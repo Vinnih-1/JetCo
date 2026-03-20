@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
@@ -44,6 +45,7 @@ internal fun BaseFloatingActionButton(
         Row(
             horizontalArrangement = Arrangement.spacedBy(config.buttonStyle.horizontalSpace),
             verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(config.buttonStyle.padding)
         ) {
             if (icon != null) {
                 icon.invoke()
