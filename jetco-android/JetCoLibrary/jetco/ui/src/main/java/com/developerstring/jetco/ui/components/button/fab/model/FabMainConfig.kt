@@ -6,6 +6,7 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
@@ -30,6 +31,14 @@ data class FabMainConfig(
             START,
             END
         }
+
+        data class Morph(
+            val columns: Int = 2,
+            val spacedBy: Dp = 12.dp,
+            val headerSpace: Dp = 20.dp,
+            val width: Dp = 250.dp,
+            val cardShape: Shape = RoundedCornerShape(24.dp)
+        ) : Orientation
     }
 
     @Stable
@@ -53,6 +62,7 @@ data class FabMainConfig(
     data class ItemArrangement(
         val radius: Dp = 80.dp,
         val radial: Orientation.Radial = Orientation.Radial.END,
-        val stack: Orientation.Stack = Orientation.Stack.TOP
+        val stack: Orientation.Stack = Orientation.Stack.TOP,
+        val morph: Orientation.Morph = Orientation.Morph()
     )
 }

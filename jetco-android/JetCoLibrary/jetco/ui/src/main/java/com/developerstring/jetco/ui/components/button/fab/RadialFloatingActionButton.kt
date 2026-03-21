@@ -88,7 +88,7 @@ fun RadialFloatingActionButton(
                 item = item,
                 modifier = Modifier
                     .offset(x = offsetX.value, y = -offsetY.value)
-                    .padding(end = (config.buttonStyle.size - item.style.size) / 2)
+                    .padding(end = (config.buttonStyle.size - item.buttonStyle.size) / 2)
                     .graphicsLayer { alpha = animatedAlpha },
                 onClick = { item.onClick() }
             )

@@ -58,8 +58,8 @@ fun StackFloatingActionButton(
             )
 
             val spacing = when (stack) {
-                FabMainConfig.Orientation.Stack.TOP -> (index + 1) * (item.style.size + spacedBy)
-                else -> fabWidthDp + spacedBy + index * (item.style.size + spacedBy)
+                FabMainConfig.Orientation.Stack.TOP -> (index + 1) * (item.buttonStyle.size + spacedBy)
+                else -> fabWidthDp + spacedBy + index * (item.buttonStyle.size + spacedBy)
             }
 
             // Each orientation moves items along a different axis
@@ -98,7 +98,7 @@ fun StackFloatingActionButton(
                     .offset(x = animatedOffsetX, y = animatedOffsetY)
                     .padding(
                         end = if (stack == FabMainConfig.Orientation.Stack.TOP) {
-                            (fabWidthDp - item.style.size) / 2
+                            (fabWidthDp - item.buttonStyle.size) / 2
                         } else 0.dp
                     ).graphicsLayer { alpha = animatedAlpha },
                 onClick = { item.onClick() }
