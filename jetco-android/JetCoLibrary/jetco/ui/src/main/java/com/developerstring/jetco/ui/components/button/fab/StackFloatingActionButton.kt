@@ -23,6 +23,32 @@ import com.developerstring.jetco.ui.components.button.fab.components.SubFabItem
 import com.developerstring.jetco.ui.components.button.fab.model.FabMainConfig
 import com.developerstring.jetco.ui.components.button.fab.model.FabSubItem
 
+/**
+ * A Floating Action Button that expands sub-items linearly in a stack — above, to the left,
+ * or to the right of the main button.
+ *
+ * Sub-items are pushed outward using animated offsets driven by tween animations.
+ *
+ * ## Example Usage:
+ * ```kotlin
+ * StackFloatingActionButton(
+ *     expanded = isExpanded,
+ *     items = listOf(
+ *         FabSubItem(
+ *             onClick = { }
+ *         )
+ *     )
+ * )
+ * ```
+ *
+ * @param expanded Whether the FAB is currently expanded, showing sub-items.
+ * @param items List of [FabSubItem] sub-actions to display when expanded.
+ * @param modifier Modifier applied to the root [Box] container.
+ * @param text Optional composable rendered as a text label inside the main FAB button.
+ * @param icon Optional custom icon composable for the main button.
+ * @param onClick Click handler for the main FAB button.
+ * @param config Visual and layout configuration. See [FabMainConfig].
+ */
 @Composable
 fun StackFloatingActionButton(
     expanded: Boolean,

@@ -35,6 +35,34 @@ import com.developerstring.jetco.ui.components.button.fab.model.FabMainConfig
 import com.developerstring.jetco.ui.components.button.fab.model.FabSubItem
 import kotlinx.coroutines.delay
 
+/**
+ * A Floating Action Button that morphs into an expanded card grid when activated.
+ *
+ * When collapsed, it displays a standard circular FAB. When expanded, it animates into
+ * a rounded card containing a title header with a close button, and a configurable grid
+ * of sub-action items. Sub-items fade in one by one with a staggered entrance animation.
+ *
+ * ## Example Usage:
+ * ```kotlin
+ * MorphFloatingActionButton(
+ *     expanded = isExpanded,
+ *     items = listOf(
+ *         FabSubItem(
+ *             onClick = { }
+ *         )
+ *     )
+ * )
+ * ```
+ *
+ * @param expanded Whether the FAB is currently expanded into card form.
+ * @param items List of [FabSubItem] sub-actions to display in the card grid.
+ * @param modifier Modifier applied to the root [Box] container.
+ * @param onClick Click handler for both the main FAB button and the card close button.
+ * @param title Optional composable rendered as the card header title.
+ * @param text Optional composable rendered as a text label inside the collapsed FAB button.
+ * @param icon Optional custom icon composable for the collapsed FAB button.
+ * @param config Visual and layout configuration. See [FabMainConfig].
+ */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun MorphFloatingActionButton(
@@ -67,6 +95,7 @@ fun MorphFloatingActionButton(
                     .width(morph.width)
                     .padding(16.dp)
             ) {
+                // Card header: title on the left, close button on the right
                 Box(modifier = Modifier.fillMaxWidth()) {
                     Box(modifier = Modifier.align(Alignment.CenterStart)) {
                         title?.invoke()

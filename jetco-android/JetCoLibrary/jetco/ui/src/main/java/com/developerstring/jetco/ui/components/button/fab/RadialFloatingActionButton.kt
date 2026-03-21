@@ -27,6 +27,32 @@ import kotlinx.coroutines.launch
 import kotlin.math.cos
 import kotlin.math.sin
 
+/**
+ * A Floating Action Button that expands sub-items radially in an arc around the main button.
+ *
+ * When expanded, sub-items fan out in a configurable arc using spring physics with a staggered
+ * delay, creating a natural and lively feel. When collapsed, items snap back with a clean tween.
+ * The arc direction and radius are fully configurable via [FabMainConfig.ItemArrangement].
+ *
+ * ## Example Usage:
+ * ```kotlin
+ * RadialFloatingActionButton(
+ *     expanded = isExpanded,
+ *     items = listOf(
+ *         FabSubItem(
+ *             onClick = { }
+ *         )
+ *     )
+ * )
+ * ```
+ *
+ * @param expanded Whether the FAB is currently expanded, showing sub-items.
+ * @param items List of [FabSubItem] sub-actions to display when expanded.
+ * @param modifier Modifier applied to the root [Box] container.
+ * @param onClick Click handler for the main FAB button.
+ * @param icon Optional custom icon composable for the main button.
+ * @param config Visual and layout configuration. See [FabMainConfig].
+ */
 @Composable
 fun RadialFloatingActionButton(
     expanded: Boolean,
@@ -104,4 +130,3 @@ fun RadialFloatingActionButton(
         )
     }
 }
-
