@@ -36,6 +36,7 @@ fun StackFloatingActionButton(
     val stack = config.itemArrangement.stack
     val density = LocalDensity.current
     var fabWidthDp by remember { mutableStateOf(config.buttonStyle.size) }
+    var fabHeightDp by remember { mutableStateOf(config.buttonStyle.size) }
     val spacedBy = stack.spacedBy
 
     // The Box anchor changes depending on which direction items spread
@@ -58,8 +59,10 @@ fun StackFloatingActionButton(
             )
 
             val spacing = when (stack) {
-                FabMainConfig.Orientation.Stack.TOP -> (index + 1) * (item.buttonStyle.size + spacedBy)
-                else -> fabWidthDp + spacedBy + index * (item.buttonStyle.size + spacedBy)
+                FabMainConfig.Orientation.Stack.TOP ->
+                    fabHeightDp + spacedBy + index * (item.buttonStyle.size + spacedBy)
+                else ->
+                    fabWidthDp + spacedBy + index * (item.buttonStyle.size + spacedBy)
             }
 
             // Each orientation moves items along a different axis
@@ -114,6 +117,7 @@ fun StackFloatingActionButton(
             config = config,
             modifier = Modifier.onSizeChanged { size ->
                 fabWidthDp = with(density) { size.width.toDp() }
+                fabHeightDp = with(density) { size.height.toDp() }
             }
         )
     }
