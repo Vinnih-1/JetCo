@@ -18,7 +18,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
-import com.developerstring.jetco.ui.components.button.fab.base.BaseFloatingActionButton
+import com.developerstring.jetco.ui.components.button.fab.base.DefaultFloatingActionButton
 import com.developerstring.jetco.ui.components.button.fab.components.SubFabItem
 import com.developerstring.jetco.ui.components.button.fab.model.FabMainConfig
 import com.developerstring.jetco.ui.components.button.fab.model.FabSubItem
@@ -44,8 +44,6 @@ import com.developerstring.jetco.ui.components.button.fab.model.FabSubItem
  * @param expanded Whether the FAB is currently expanded, showing sub-items.
  * @param items List of [FabSubItem] sub-actions to display when expanded.
  * @param modifier Modifier applied to the root [Box] container.
- * @param text Optional composable rendered as a text label inside the main FAB button.
- * @param icon Optional custom icon composable for the main button.
  * @param onClick Click handler for the main FAB button.
  * @param config Visual and layout configuration. See [FabMainConfig].
  */
@@ -54,10 +52,15 @@ fun StackFloatingActionButton(
     expanded: Boolean,
     items: List<FabSubItem>,
     modifier: Modifier = Modifier,
-    text: (@Composable () -> Unit)? = null,
-    icon: (@Composable () -> Unit)? = null,
     onClick: () -> Unit = {},
-    config: FabMainConfig = FabMainConfig()
+    config: FabMainConfig = FabMainConfig(),
+    content: (@Composable () -> Unit) = {
+        DefaultFloatingActionButton(
+            expanded = expanded,
+            onClick = onClick,
+            config = config
+        )
+    }
 ) {
     val stack = config.itemArrangement.stack
     val density = LocalDensity.current
@@ -134,17 +137,14 @@ fun StackFloatingActionButton(
             )
         }
 
-        // Main FAB button
-        BaseFloatingActionButton(
-            expanded = expanded,
-            text = text,
-            icon = icon,
-            onClick = onClick,
-            config = config,
+        // Main FAB
+        Box(
             modifier = Modifier.onSizeChanged { size ->
                 fabWidthDp = with(density) { size.width.toDp() }
                 fabHeightDp = with(density) { size.height.toDp() }
             }
-        )
+        ) {
+            content()
+        }
     }
 }

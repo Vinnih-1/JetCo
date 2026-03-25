@@ -29,7 +29,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
-import com.developerstring.jetco.ui.components.button.fab.base.BaseFloatingActionButton
+import com.developerstring.jetco.ui.components.button.fab.base.DefaultFloatingActionButton
 import com.developerstring.jetco.ui.components.button.fab.components.SubFabItem
 import com.developerstring.jetco.ui.components.button.fab.model.FabMainConfig
 import com.developerstring.jetco.ui.components.button.fab.model.FabSubItem
@@ -59,8 +59,6 @@ import kotlinx.coroutines.delay
  * @param modifier Modifier applied to the root [Box] container.
  * @param onClick Click handler for both the main FAB button and the card close button.
  * @param title Optional composable rendered as the card header title.
- * @param text Optional composable rendered as a text label inside the collapsed FAB button.
- * @param icon Optional custom icon composable for the collapsed FAB button.
  * @param config Visual and layout configuration. See [FabMainConfig].
  */
 @OptIn(ExperimentalLayoutApi::class)
@@ -71,9 +69,14 @@ fun MorphFloatingActionButton(
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
     title: (@Composable () -> Unit)? = null,
-    text: (@Composable () -> Unit)? = null,
-    icon: (@Composable () -> Unit)? = null,
-    config: FabMainConfig = FabMainConfig()
+    config: FabMainConfig = FabMainConfig(),
+    content: (@Composable () -> Unit) = {
+        DefaultFloatingActionButton(
+            expanded = false,
+            onClick = onClick,
+            config = config
+        )
+    }
 ) {
     val morph = config.itemArrangement.morph
     val staggerStep = config.animation.durationMillis / (items.size + 1)
@@ -151,13 +154,9 @@ fun MorphFloatingActionButton(
                 }
             }
         } else {
-            BaseFloatingActionButton(
-                expanded = false,
-                text = text,
-                icon = icon,
-                onClick = onClick,
-                config = config
-            )
+            Box(contentAlignment = Alignment.Center) {
+                content()
+            }
         }
     }
 }

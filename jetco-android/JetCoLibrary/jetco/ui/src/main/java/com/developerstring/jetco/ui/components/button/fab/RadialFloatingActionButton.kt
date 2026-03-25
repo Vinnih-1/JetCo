@@ -18,7 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.developerstring.jetco.ui.components.button.fab.base.BaseFloatingActionButton
+import com.developerstring.jetco.ui.components.button.fab.base.DefaultFloatingActionButton
 import com.developerstring.jetco.ui.components.button.fab.components.SubFabItem
 import com.developerstring.jetco.ui.components.button.fab.model.FabMainConfig
 import com.developerstring.jetco.ui.components.button.fab.model.FabSubItem
@@ -50,7 +50,6 @@ import kotlin.math.sin
  * @param items List of [FabSubItem] sub-actions to display when expanded.
  * @param modifier Modifier applied to the root [Box] container.
  * @param onClick Click handler for the main FAB button.
- * @param icon Optional custom icon composable for the main button.
  * @param config Visual and layout configuration. See [FabMainConfig].
  */
 @Composable
@@ -59,8 +58,14 @@ fun RadialFloatingActionButton(
     items: List<FabSubItem>,
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
-    icon: (@Composable () -> Unit)? = null,
-    config: FabMainConfig = FabMainConfig()
+    config: FabMainConfig = FabMainConfig(),
+    content: (@Composable () -> Unit) = {
+        DefaultFloatingActionButton(
+            expanded = expanded,
+            onClick = onClick,
+            config = config
+        )
+    }
 ) {
     Box(
         modifier = modifier
@@ -121,12 +126,8 @@ fun RadialFloatingActionButton(
         }
 
         // Main FAB button
-        BaseFloatingActionButton(
-            expanded = expanded,
-            text = null,
-            icon = icon,
-            onClick = onClick,
-            config = config
-        )
+        Box {
+            content()
+        }
     }
 }
