@@ -26,11 +26,9 @@ import androidx.compose.ui.graphics.Color
 import com.developerstring.jetco.ui.components.button.fab.model.FabMainConfig
 
 @Composable
-internal fun BaseFloatingActionButton(
+internal fun DefaultFloatingActionButton(
     expanded: Boolean,
     modifier: Modifier = Modifier,
-    text: (@Composable () -> Unit)? = null,
-    icon: (@Composable () -> Unit)? = null,
     onClick: (() -> Unit) = {},
     config: FabMainConfig = FabMainConfig()
 ) {
@@ -62,18 +60,13 @@ internal fun BaseFloatingActionButton(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier.rotate(mainIconRotation)
             ) {
-                if (icon != null) {
-                    icon.invoke()
-                } else {
-                    Icon(
-                        imageVector = Icons.Rounded.Add,
-                        contentDescription = "Base FAB icon",
-                        tint = Color.White,
-                        modifier = Modifier.size(config.buttonStyle.size * 0.55f)
-                    )
-                }
+                Icon(
+                    imageVector = Icons.Rounded.Add,
+                    contentDescription = "Base FAB icon",
+                    tint = Color.White,
+                    modifier = Modifier.size(config.buttonStyle.size * 0.55f)
+                )
             }
-            text?.invoke()
         }
     }
 }
