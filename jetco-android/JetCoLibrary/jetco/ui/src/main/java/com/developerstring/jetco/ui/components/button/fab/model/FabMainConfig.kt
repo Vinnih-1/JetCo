@@ -3,6 +3,8 @@ package com.developerstring.jetco.ui.components.button.fab.model
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.Easing
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.shape.CircleShape
@@ -34,20 +36,18 @@ data class FabMainConfig(
      * and [Morph] for the card expansion layout.
      */
     sealed interface Orientation {
-
-        /**
-         * Radial orientation that spreads sub-items in an arc around the main FAB.
-         *
-         * @property start Start angle of the arc in degrees (standard math convention).
-         * @property end End angle of the arc in degrees.
-         */
-        enum class Radial(val start: Double, val end: Double) : Orientation {
-            /** Spreads items from 90° to 180° (upward and to the left). */
-            END(90.0, 180.0),
-            /** Spreads items from 90° to 0° (upward and to the right). */
-            START(90.0, 0.0),
-            /** Spreads items from 0° to 180° (full upper arc). */
-            CENTER(0.0, 180.0)
+        data class Radial(
+            val arc: Arc = Arc.END,
+            val radius: Dp = 80.dp
+        ) : Orientation {
+            enum class Arc(val start: Double, val end: Double) : Orientation {
+                /** Spreads items from 90° to 180° (upward and to the left). */
+                END(90.0, 180.0),
+                /** Spreads items from 90° to 0° (upward and to the right). */
+                START(90.0, 0.0),
+                /** Spreads items from 0° to 180° (full upper arc). */
+                CENTER(0.0, 180.0)
+            }
         }
 
         /**
@@ -91,10 +91,24 @@ data class FabMainConfig(
      */
     @Stable
     open class Animation(
-        val durationMillis: Int = 300,
-        val easing: Easing = FastOutSlowInEasing,
-        val animationSpec: AnimationSpec<Float> = tween(durationMillis, easing = easing)
+        val enterOrder: StaggerOrder = StaggerOrder.FIFO,
+        val exitOrder: StaggerOrder = StaggerOrder.FILO,
+        val enterTransition: FabTransition = FabTransition.Spring() + FabTransition.Fade(),
+        val exitTransition: FabTransition = FabTransition.Slide() + FabTransition.Fade()
     )
+
+    @Stable
+    enum class StaggerOrder {
+        FIFO,
+        FILO,
+        ALL;
+
+        internal fun delayFor(index: Int, total: Int, stepMs: Int): Long = when (this) {
+            FIFO -> (index * stepMs).toLong()
+            FILO -> ((total - 1 - index) * stepMs).toLong()
+            ALL  -> 0L
+        }
+    }
 
     /**
      * Visual style configuration for the main FAB button.
@@ -119,15 +133,12 @@ data class FabMainConfig(
     /**
      * Layout and orientation configuration for FAB sub-items.
      *
-     * @param radius Distance from the main FAB center to each sub-item in radial layout. Default is 80.dp.
-     * @param radial Radial arc orientation. Default is [Orientation.Radial.END].
      * @param stack Stack direction orientation. Default is [Orientation.Stack.TOP].
      * @param morph Morph card configuration. Default is [Orientation.Morph].
      */
     @Stable
     data class ItemArrangement(
-        val radius: Dp = 80.dp,
-        val radial: Orientation.Radial = Orientation.Radial.END,
+        val radial: Orientation.Radial = Orientation.Radial(),
         val stack: Orientation.Stack = Orientation.Stack.TOP,
         val morph: Orientation.Morph = Orientation.Morph()
     )

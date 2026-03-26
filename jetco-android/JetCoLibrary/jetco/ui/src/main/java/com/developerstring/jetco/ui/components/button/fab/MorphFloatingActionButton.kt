@@ -25,7 +25,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
@@ -34,6 +33,7 @@ import com.developerstring.jetco.ui.components.button.fab.components.SubFabItem
 import com.developerstring.jetco.ui.components.button.fab.model.FabMainConfig
 import com.developerstring.jetco.ui.components.button.fab.model.FabSubItem
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 /**
  * A Floating Action Button that morphs into an expanded card grid when activated.
@@ -79,18 +79,19 @@ fun MorphFloatingActionButton(
     }
 ) {
     val morph = config.itemArrangement.morph
-    val staggerStep = config.animation.durationMillis / (items.size + 1)
 
     Box(
         modifier = modifier
             .animateContentSize(
                 animationSpec = tween(
-                    durationMillis = config.animation.durationMillis,
-                    easing = config.animation.easing
+                    durationMillis = 300,
+                    easing = FastOutSlowInEasing
                 )
             )
-            .clip(if (expanded) morph.cardShape else config.buttonStyle.shape)
-            .background(config.buttonStyle.color)
+            .background(
+                color = if (expanded) config.buttonStyle.color else Color.Transparent,
+                shape = if (expanded) morph.cardShape else config.buttonStyle.shape
+            )
     ) {
         if (expanded) {
             Column(
@@ -135,14 +136,24 @@ fun MorphFloatingActionButton(
                         val alpha = remember { Animatable(0f) }
 
                         LaunchedEffect(Unit) {
-                            delay((index * staggerStep).toLong())
-                            alpha.animateTo(
-                                targetValue = 1f,
-                                animationSpec = tween(
-                                    durationMillis = (config.animation.durationMillis + ((index + 1) * 100)),
-                                    easing = FastOutSlowInEasing
-                                )
+                            val stepMs = 300 / (items.size + 1)
+                            val order = if (expanded) config.animation.enterOrder else config.animation.exitOrder
+                            val staggerDelay = order.delayFor(
+                                index = index,
+                                total = items.size,
+                                stepMs = stepMs
                             )
+                            val transition = if (expanded) config.animation.enterTransition else config.animation.exitTransition
+
+                            delay(staggerDelay)
+
+                            val targetAlpha = if (expanded) 1f else 0f
+
+                            if (transition.alphaSpec != null) {
+                                launch { alpha.animateTo(targetAlpha, transition.alphaSpec) }
+                            } else {
+                                alpha.snapTo(targetAlpha)
+                            }
                         }
 
                         SubFabItem(

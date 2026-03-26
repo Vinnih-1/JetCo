@@ -1,18 +1,12 @@
 package com.developerstring.jetco.ui.components.button.fab
 
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.AnimationSpec
-import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.VectorConverter
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
@@ -72,13 +66,8 @@ fun RadialFloatingActionButton(
     ) {
         // Sub-items — laid out behind the main FAB
         items.forEachIndexed { index, item ->
-            val animatedAlpha by animateFloatAsState(
-                targetValue = if (expanded) 1f else 0f,
-                animationSpec = config.animation.animationSpec,
-                label = "alpha_$index"
-            )
-            val startAngle = config.itemArrangement.radial.start
-            val endAngle = config.itemArrangement.radial.end
+            val startAngle = config.itemArrangement.radial.arc.start
+            val endAngle = config.itemArrangement.radial.arc.end
 
             val angleDeg = if (items.size == 1) {
                 (startAngle + endAngle) / 2.0  // single item lands at the midpoint of the arc
@@ -87,31 +76,37 @@ fun RadialFloatingActionButton(
             }
             val angleRad = Math.toRadians(angleDeg)
 
-            val targetOffsetX = if (expanded) (config.itemArrangement.radius.value * cos(angleRad)).dp else 0.dp
-            val targetOffsetY = if (expanded) (config.itemArrangement.radius.value * sin(angleRad)).dp else 0.dp
+            val targetOffsetX = if (expanded) (config.itemArrangement.radial.radius.value * cos(angleRad)).dp else 0.dp
+            val targetOffsetY = if (expanded) (config.itemArrangement.radial.radius.value * sin(angleRad)).dp else 0.dp
 
+            val alpha = remember { Animatable(0f) }
             val offsetX = remember { Animatable(0.dp, Dp.VectorConverter) }
             val offsetY = remember { Animatable(0.dp, Dp.VectorConverter) }
 
-            val springSpec: AnimationSpec<Dp> = spring(
-                dampingRatio = Spring.DampingRatioMediumBouncy,
-                stiffness = Spring.StiffnessMedium
-            )
-
-            val tweenSpec: AnimationSpec<Dp> = tween(
-                durationMillis = config.animation.durationMillis,
-                easing = config.animation.easing
-            )
-
             LaunchedEffect(expanded) {
-                val staggerDelay = (index * 60).toLong()
-                if (expanded) {
-                    delay(staggerDelay)
-                    launch { offsetX.animateTo(targetOffsetX, springSpec) }
-                    launch { offsetY.animateTo(targetOffsetY, springSpec) }
+                val stepMs = 300 / (items.size + 1)
+                val order = if (expanded) config.animation.enterOrder else config.animation.exitOrder
+                val transition = if (expanded) config.animation.enterTransition else config.animation.exitTransition
+                val staggerDelay = order.delayFor(index = index, total = items.size, stepMs = stepMs)
+
+                delay(staggerDelay)
+
+                val targetX = if (expanded) targetOffsetX else targetOffsetX
+                val targetY = if (expanded) targetOffsetY else targetOffsetY
+                val targetAlpha = if (expanded) 1f else 0f
+
+                if (transition.offsetSpec != null) {
+                    launch { offsetX.animateTo(targetX, transition.offsetSpec) }
+                    launch { offsetY.animateTo(targetY, transition.offsetSpec) }
+                } else if (expanded) {
+                    offsetX.snapTo(targetX)
+                    offsetY.snapTo(targetY)
+                }
+
+                if (transition.alphaSpec != null) {
+                    launch { alpha.animateTo(targetAlpha, transition.alphaSpec) }
                 } else {
-                    launch { offsetX.animateTo(0.dp, tweenSpec) }
-                    launch { offsetY.animateTo(0.dp, tweenSpec) }
+                    alpha.snapTo(targetAlpha)
                 }
             }
 
@@ -120,7 +115,7 @@ fun RadialFloatingActionButton(
                 modifier = Modifier
                     .offset(x = offsetX.value, y = -offsetY.value)
                     .padding(end = (config.buttonStyle.size - item.buttonStyle.size) / 2)
-                    .graphicsLayer { alpha = animatedAlpha },
+                    .graphicsLayer { this.alpha = alpha.value },
                 onClick = { item.onClick() }
             )
         }
