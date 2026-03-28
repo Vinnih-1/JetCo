@@ -23,6 +23,7 @@ import com.developerstring.jetco.ui.components.button.fab.base.DefaultFloatingAc
 import com.developerstring.jetco.ui.components.button.fab.components.SubFabItem
 import com.developerstring.jetco.ui.components.button.fab.model.FabMainConfig
 import com.developerstring.jetco.ui.components.button.fab.model.FabSubItem
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -58,53 +59,52 @@ fun StackFloatingActionButton(
     onClick: () -> Unit = {},
     config: FabMainConfig = FabMainConfig(),
     content: (@Composable () -> Unit) = {
-        DefaultFloatingActionButton(
-            expanded = expanded,
-            onClick = onClick,
-            config = config
-        )
+        DefaultFloatingActionButton(onClick = onClick, config = config)
     }
 ) {
-    val stack = config.itemArrangement.stack
+    val direction = config.itemArrangement.stack.direction
     val density = LocalDensity.current
     var fabWidthDp by remember { mutableStateOf(config.buttonStyle.size) }
     var fabHeightDp by remember { mutableStateOf(config.buttonStyle.size) }
-    val spacedBy = stack.spacedBy
+    val spacedBy = config.itemArrangement.stack.spacedBy
 
     // The Box anchor changes depending on which direction items spread
-    val alignment = when (stack) {
-        FabMainConfig.Orientation.Stack.TOP -> Alignment.BottomEnd
-        FabMainConfig.Orientation.Stack.START -> Alignment.CenterEnd
-        FabMainConfig.Orientation.Stack.END -> Alignment.CenterStart
+    val alignment = when (direction) {
+        FabMainConfig.Orientation.Stack.Direction.TOP -> Alignment.BottomEnd
+        FabMainConfig.Orientation.Stack.Direction.START -> Alignment.CenterEnd
+        FabMainConfig.Orientation.Stack.Direction.END -> Alignment.CenterStart
     }
 
     Box(
         modifier = modifier,
         contentAlignment = alignment
     ) {
+        val fabOffsetX = remember { Animatable(0.dp, Dp.VectorConverter) }
+        val fabOffsetY = remember { Animatable(0.dp, Dp.VectorConverter) }
         // Sub-items — stacked in the direction defined by Orientation.Stack
         items.forEachIndexed { index, item ->
 
-
-            val spacing = when (stack) {
-                FabMainConfig.Orientation.Stack.TOP ->
+            val spacing = when (direction) {
+                FabMainConfig.Orientation.Stack.Direction.TOP ->
                     fabHeightDp + spacedBy + index * (item.buttonStyle.size + spacedBy)
                 else ->
                     fabWidthDp + spacedBy + index * (item.buttonStyle.size + spacedBy)
             }
 
             // Each orientation moves items along a different axis
-            val targetOffsetX = when (stack) {
-                FabMainConfig.Orientation.Stack.START -> -spacing
-                FabMainConfig.Orientation.Stack.END -> spacing
+            val targetOffsetX = when (direction) {
+                FabMainConfig.Orientation.Stack.Direction.START -> -spacing
+                FabMainConfig.Orientation.Stack.Direction.END -> spacing
                 else -> 0.dp
             }
 
-            val targetOffsetY = when (stack) {
-                FabMainConfig.Orientation.Stack.TOP -> -spacing
+            val targetOffsetY = when (direction) {
+                FabMainConfig.Orientation.Stack.Direction.TOP -> -spacing
                 else -> 0.dp
             }
 
+            val rotation = remember { Animatable(0f) }
+            val scale = remember { Animatable(0f) }
             val alpha = remember { Animatable(0f) }
             val offsetX = remember { Animatable(0.dp, Dp.VectorConverter) }
             val offsetY = remember { Animatable(0.dp, Dp.VectorConverter) }
@@ -117,44 +117,105 @@ fun StackFloatingActionButton(
 
                 delay(staggerDelay)
 
-                val targetX = if (expanded) targetOffsetX else 0.dp
-                val targetY = if (expanded) targetOffsetY else 0.dp
-                val targetAlpha = if (expanded) 1f else 0f
-
-                if (transition.offsetSpec != null) {
-                    launch { offsetX.animateTo(targetX, transition.offsetSpec) }
-                    launch { offsetY.animateTo(targetY, transition.offsetSpec) }
-                } else if (expanded) {
-                    offsetX.snapTo(targetX)
-                    offsetY.snapTo(targetY)
+                coroutineScope {
+                    launch {
+                        offsetX.animateOrSnap(
+                            targetValue = if (expanded) targetOffsetX else 0.dp,
+                            spec = transition.offsetSpec,
+                            predicate = { expanded }
+                        )
+                    }
+                    launch {
+                        offsetY.animateOrSnap(
+                            targetValue = if (expanded) targetOffsetY else 0.dp,
+                            spec = transition.offsetSpec,
+                            predicate = { expanded }
+                        )
+                    }
+                    launch {
+                        alpha.animateOrSnap(
+                            targetValue = if (expanded) 1f else 0f,
+                            spec = transition.alphaSpec,
+                            predicate = { expanded }
+                        )
+                    }
+                    launch {
+                        scale.animateOrSnap(
+                            targetValue = if (expanded) 1f else 0f,
+                            spec = transition.scaleSpec,
+                            predicate = { expanded }
+                        )
+                    }
+                    launch {
+                        rotation.animateOrSnap(
+                            targetValue = transition.rotate?.target,
+                            spec = transition.rotate?.spec,
+                            predicate = { expanded }
+                        )
+                    }
                 }
 
-                if (transition.alphaSpec != null) {
-                    launch { alpha.animateTo(targetAlpha, transition.alphaSpec) }
-                } else {
-                    alpha.snapTo(targetAlpha)
+                if (!expanded) { // Reset to initial position
+                    offsetX.snapTo(0.dp)
+                    offsetY.snapTo(0.dp)
+                    alpha.snapTo(0f)
+                    scale.snapTo(0f)
                 }
             }
 
             SubFabItem(
                 item = item,
                 modifier = Modifier
-                    .offset(x = offsetX.value, y = offsetY.value)
+                    .offset(x = offsetX.value + fabOffsetX.value, y = offsetY.value + fabOffsetY.value)
                     .padding(
-                        end = if (stack == FabMainConfig.Orientation.Stack.TOP) {
+                        end = if (direction == FabMainConfig.Orientation.Stack.Direction.TOP) {
                             (fabWidthDp - item.buttonStyle.size) / 2
                         } else 0.dp
-                    ).graphicsLayer { this.alpha = alpha.value },
+                    ).graphicsLayer {
+                        this.alpha = alpha.value
+                        this.scaleX = scale.value
+                        this.scaleY = scale.value
+                        this.rotationZ = rotation.value
+                    },
                 onClick = { item.onClick() }
             )
         }
 
+        val fabScale = remember { Animatable(1f) }
+        val fabRotation = remember { Animatable(0f) }
+
+        LaunchedEffect(expanded) {
+            val btnTransition = if (expanded) config.animation.buttonEnterTransition
+            else config.animation.buttonExitTransition
+
+            coroutineScope {
+                launch {
+                    fabOffsetX.animateOrSnap(btnTransition.offset?.offsetX, btnTransition.offset?.spec)
+                }
+                launch {
+                    fabOffsetY.animateOrSnap(btnTransition.offset?.offsetY, btnTransition.offset?.spec)
+                }
+                launch {
+                    fabScale.animateOrSnap(btnTransition.scale?.target, btnTransition.scale?.spec)
+                }
+                launch {
+                    fabRotation.animateOrSnap(btnTransition.rotation?.target, btnTransition.rotation?.spec)
+                }
+            }
+        }
+
         // Main FAB
         Box(
-            modifier = Modifier.onSizeChanged { size ->
-                fabWidthDp = with(density) { size.width.toDp() }
-                fabHeightDp = with(density) { size.height.toDp() }
-            }
+            modifier = Modifier
+                .offset(x = fabOffsetX.value, y = fabOffsetY.value)
+                .graphicsLayer {
+                    scaleX = fabScale.value
+                    scaleY = fabScale.value
+                    rotationZ = fabRotation.value
+                }.onSizeChanged { size ->
+                    fabWidthDp = with(density) { size.width.toDp() }
+                    fabHeightDp = with(density) { size.height.toDp() }
+                }
         ) {
             content()
         }

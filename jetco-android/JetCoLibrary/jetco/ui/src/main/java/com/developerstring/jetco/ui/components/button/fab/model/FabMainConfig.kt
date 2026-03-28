@@ -1,11 +1,7 @@
 package com.developerstring.jetco.ui.components.button.fab.model
 
 import androidx.compose.animation.core.AnimationSpec
-import androidx.compose.animation.core.Easing
 import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -40,7 +36,7 @@ data class FabMainConfig(
             val arc: Arc = Arc.END,
             val radius: Dp = 80.dp
         ) : Orientation {
-            enum class Arc(val start: Double, val end: Double) : Orientation {
+            enum class Arc(val start: Double, val end: Double) {
                 /** Spreads items from 90° to 180° (upward and to the left). */
                 END(90.0, 180.0),
                 /** Spreads items from 90° to 0° (upward and to the right). */
@@ -50,18 +46,18 @@ data class FabMainConfig(
             }
         }
 
-        /**
-         * Stack orientation that spreads sub-items linearly in one direction.
-         *
-         * @property spacedBy Gap between each sub-item. Default is 40.dp.
-         */
-        enum class Stack(val spacedBy: Dp = 40.dp) : Orientation {
-            /** Spreads items upward above the main FAB. */
-            TOP,
-            /** Spreads items to the left of the main FAB. */
-            START,
-            /** Spreads items to the right of the main FAB. */
-            END
+        data class Stack(
+            val direction: Direction = Direction.TOP,
+            val spacedBy: Dp = 40.dp
+        ) : Orientation {
+            enum class Direction {
+                /** Spreads items upward above the main FAB. */
+                TOP,
+                /** Spreads items to the left of the main FAB. */
+                START,
+                /** Spreads items to the right of the main FAB. */
+                END
+            }
         }
 
         /**
@@ -93,8 +89,10 @@ data class FabMainConfig(
     open class Animation(
         val enterOrder: StaggerOrder = StaggerOrder.FIFO,
         val exitOrder: StaggerOrder = StaggerOrder.FILO,
-        val enterTransition: FabTransition = FabTransition.Spring() + FabTransition.Fade(),
-        val exitTransition: FabTransition = FabTransition.Slide() + FabTransition.Fade()
+        val enterTransition: FabItemTransition = FabItemTransition.Spring() + FabItemTransition.Fade(),
+        val exitTransition: FabItemTransition = FabItemTransition.Slide() + FabItemTransition.Fade(),
+        val buttonEnterTransition: FabButtonTransition = FabButtonTransition.Rotate(45f),
+        val buttonExitTransition: FabButtonTransition = FabButtonTransition.Rotate(0f)
     )
 
     @Stable
@@ -139,7 +137,7 @@ data class FabMainConfig(
     @Stable
     data class ItemArrangement(
         val radial: Orientation.Radial = Orientation.Radial(),
-        val stack: Orientation.Stack = Orientation.Stack.TOP,
+        val stack: Orientation.Stack = Orientation.Stack(),
         val morph: Orientation.Morph = Orientation.Morph()
     )
 }

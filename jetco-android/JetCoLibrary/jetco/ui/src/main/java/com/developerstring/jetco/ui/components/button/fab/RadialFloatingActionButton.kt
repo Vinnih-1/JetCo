@@ -16,6 +16,7 @@ import com.developerstring.jetco.ui.components.button.fab.base.DefaultFloatingAc
 import com.developerstring.jetco.ui.components.button.fab.components.SubFabItem
 import com.developerstring.jetco.ui.components.button.fab.model.FabMainConfig
 import com.developerstring.jetco.ui.components.button.fab.model.FabSubItem
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.cos
@@ -54,16 +55,15 @@ fun RadialFloatingActionButton(
     onClick: () -> Unit = {},
     config: FabMainConfig = FabMainConfig(),
     content: (@Composable () -> Unit) = {
-        DefaultFloatingActionButton(
-            expanded = expanded,
-            onClick = onClick,
-            config = config
-        )
+        DefaultFloatingActionButton(onClick = onClick, config = config)
     }
 ) {
     Box(
         modifier = modifier
     ) {
+        val fabOffsetX = remember { Animatable(0.dp, Dp.VectorConverter) }
+        val fabOffsetY = remember { Animatable(0.dp, Dp.VectorConverter) }
+
         // Sub-items — laid out behind the main FAB
         items.forEachIndexed { index, item ->
             val startAngle = config.itemArrangement.radial.arc.start
@@ -76,9 +76,11 @@ fun RadialFloatingActionButton(
             }
             val angleRad = Math.toRadians(angleDeg)
 
-            val targetOffsetX = if (expanded) (config.itemArrangement.radial.radius.value * cos(angleRad)).dp else 0.dp
-            val targetOffsetY = if (expanded) (config.itemArrangement.radial.radius.value * sin(angleRad)).dp else 0.dp
+            val targetOffsetX = (config.itemArrangement.radial.radius.value * cos(angleRad)).dp
+            val targetOffsetY = (config.itemArrangement.radial.radius.value * sin(angleRad)).dp
 
+            val rotation = remember { Animatable(0f) }
+            val scale = remember { Animatable(0f) }
             val alpha = remember { Animatable(0f) }
             val offsetX = remember { Animatable(0.dp, Dp.VectorConverter) }
             val offsetY = remember { Animatable(0.dp, Dp.VectorConverter) }
@@ -91,37 +93,101 @@ fun RadialFloatingActionButton(
 
                 delay(staggerDelay)
 
-                val targetX = if (expanded) targetOffsetX else targetOffsetX
-                val targetY = if (expanded) targetOffsetY else targetOffsetY
-                val targetAlpha = if (expanded) 1f else 0f
-
-                if (transition.offsetSpec != null) {
-                    launch { offsetX.animateTo(targetX, transition.offsetSpec) }
-                    launch { offsetY.animateTo(targetY, transition.offsetSpec) }
-                } else if (expanded) {
-                    offsetX.snapTo(targetX)
-                    offsetY.snapTo(targetY)
+                coroutineScope {
+                    launch {
+                        offsetX.animateOrSnap(
+                            targetValue = if (expanded) targetOffsetX else fabOffsetX.value,
+                            spec = transition.offsetSpec,
+                            predicate = { expanded }
+                        )
+                    }
+                    launch {
+                        offsetY.animateOrSnap(
+                            targetValue = if (expanded) targetOffsetY else -fabOffsetY.value,
+                            spec = transition.offsetSpec,
+                            predicate = { expanded }
+                        )
+                    }
+                    launch {
+                        alpha.animateOrSnap(
+                            targetValue = if (expanded) 1f else 0f,
+                            spec = transition.alphaSpec,
+                            predicate = { expanded }
+                        )
+                    }
+                    launch {
+                        scale.animateOrSnap(
+                            targetValue = if (expanded) 1f else 0f,
+                            spec = transition.scaleSpec,
+                            predicate = { expanded }
+                        )
+                    }
+                    launch {
+                        rotation.animateOrSnap(
+                            targetValue = transition.rotate?.target,
+                            spec = transition.rotate?.spec,
+                            predicate = { expanded }
+                        )
+                    }
                 }
 
-                if (transition.alphaSpec != null) {
-                    launch { alpha.animateTo(targetAlpha, transition.alphaSpec) }
-                } else {
-                    alpha.snapTo(targetAlpha)
+                if (!expanded) { // Reset to initial position
+                    offsetX.snapTo(0.dp)
+                    offsetY.snapTo(0.dp)
+                    alpha.snapTo(0f)
+                    scale.snapTo(0f)
+                    rotation.snapTo(0f)
                 }
             }
 
             SubFabItem(
                 item = item,
                 modifier = Modifier
-                    .offset(x = offsetX.value, y = -offsetY.value)
+                    .offset(x = offsetX.value + fabOffsetX.value, y = -offsetY.value + fabOffsetY.value)
                     .padding(end = (config.buttonStyle.size - item.buttonStyle.size) / 2)
-                    .graphicsLayer { this.alpha = alpha.value },
+                    .graphicsLayer {
+                        this.alpha = alpha.value
+                        this.scaleX = scale.value
+                        this.scaleY = scale.value
+                        this.rotationZ = rotation.value
+                    },
                 onClick = { item.onClick() }
             )
         }
 
+        val fabScale = remember { Animatable(1f) }
+        val fabRotation = remember { Animatable(0f) }
+
+        LaunchedEffect(expanded) {
+            val btnTransition = if (expanded) config.animation.buttonEnterTransition
+            else config.animation.buttonExitTransition
+
+            coroutineScope {
+                launch {
+                    fabOffsetX.animateOrSnap(btnTransition.offset?.offsetX, btnTransition.offset?.spec)
+                }
+                launch {
+                    fabOffsetY.animateOrSnap(btnTransition.offset?.offsetY, btnTransition.offset?.spec)
+                }
+                launch {
+                    fabScale.animateOrSnap(btnTransition.scale?.target, btnTransition.scale?.spec)
+                }
+                launch {
+                    fabRotation.animateOrSnap(btnTransition.rotation?.target, btnTransition.rotation?.spec)
+                }
+            }
+        }
+
         // Main FAB button
-        Box {
+        Box(
+            modifier = Modifier
+                .offset(x = fabOffsetX.value, y = fabOffsetY.value)
+                .graphicsLayer {
+                    scaleX = fabScale.value
+                    scaleY = fabScale.value
+                    rotationZ = fabRotation.value
+                }
+        ) {
             content()
         }
     }

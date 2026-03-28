@@ -23,6 +23,7 @@ import com.developerstring.jetco.ui.components.button.fab.components.SubFabItem
 import com.developerstring.jetco.ui.components.button.fab.model.FabMainConfig
 import com.developerstring.jetco.ui.components.button.fab.model.FabSubItem
 import com.developerstring.jetco.ui.components.button.fab.scope.MorphCardScope
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -60,7 +61,7 @@ fun MorphFloatingActionButton(
     onClick: () -> Unit = {},
     config: FabMainConfig = FabMainConfig(),
     content: (@Composable () -> Unit) = {
-        DefaultFloatingActionButton(expanded = false, onClick = onClick, config = config)
+        DefaultFloatingActionButton(onClick = onClick, config = config)
     },
     card: @Composable MorphCardScope.() -> Unit = {
         DefaultMorphCard(config = config, onClose = onClick, scope = this)
@@ -79,6 +80,8 @@ fun MorphFloatingActionButton(
             items.forEachIndexed { index, item ->
                 // key = index ensures remember is stable per item slot
                 val alpha = remember(index) { Animatable(0f) }
+                val scale = remember(index) { Animatable(0f) }
+                val rotation = remember { Animatable(0f) }
 
                 LaunchedEffect(index) {
                     val transition = config.animation.enterTransition
@@ -91,17 +94,46 @@ fun MorphFloatingActionButton(
 
                     delay(staggerDelay)
 
-                    if (transition.alphaSpec != null) {
-                        launch { alpha.animateTo(1f, transition.alphaSpec) }
-                    } else {
-                        alpha.snapTo(1f)
+                    coroutineScope {
+                        launch {
+                            alpha.animateOrSnap(
+                                targetValue = if (expanded) 1f else 0f,
+                                spec = transition.alphaSpec,
+                                predicate = { expanded }
+                            )
+                        }
+                        launch {
+                            scale.animateOrSnap(
+                                targetValue = if (expanded) 1f else 0f,
+                                spec = transition.scaleSpec,
+                                predicate = { expanded }
+                            )
+                        }
+                        launch {
+                            rotation.animateOrSnap(
+                                targetValue = transition.rotate?.target,
+                                spec = transition.rotate?.spec,
+                                predicate = { expanded }
+                            )
+                        }
+                    }
+
+                    if (!expanded) { // Reset to initial position
+                        alpha.snapTo(0f)
+                        scale.snapTo(0f)
+                        rotation.snapTo(0f)
                     }
                 }
 
                 SubFabItem(
                     item = item,
                     onClick = { item.onClick() },
-                    modifier = Modifier.graphicsLayer { this.alpha = alpha.value }
+                    modifier = Modifier.graphicsLayer {
+                        this.alpha = alpha.value
+                        this.scaleX = scale.value
+                        this.scaleY = scale.value
+                        this.rotationZ = rotation.value
+                    }
                 )
             }
         }
