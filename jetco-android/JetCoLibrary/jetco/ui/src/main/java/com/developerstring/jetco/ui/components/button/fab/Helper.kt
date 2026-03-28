@@ -4,7 +4,7 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.AnimationVector
 
-suspend fun <T, V : AnimationVector> Animatable<T, V>.animateOrSnap(
+internal suspend fun <T, V : AnimationVector> Animatable<T, V>.animateOrSnap(
     targetValue: T?,
     spec: AnimationSpec<T>?,
     predicate: () -> Boolean = { true }

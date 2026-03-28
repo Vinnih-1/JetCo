@@ -1,4 +1,4 @@
-package com.developerstring.jetco.ui.components.button.fab.components
+package com.developerstring.jetco.ui.components.button.fab.base
 
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
@@ -18,11 +18,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.developerstring.jetco.ui.components.button.fab.model.FabSubItem
+import com.developerstring.jetco.ui.components.button.fab.model.FabItem
 
 @Composable
-internal fun SubFabItem(
-    item: FabSubItem,
+internal fun DefaultFabItem(
+    item: FabItem,
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {

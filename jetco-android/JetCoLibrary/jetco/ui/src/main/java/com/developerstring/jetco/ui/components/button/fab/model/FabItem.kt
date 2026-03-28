@@ -13,7 +13,7 @@ import androidx.compose.ui.unit.dp
 /**
  * Data model representing a single sub-action item displayed by a FAB variant.
  *
- * Each [FabSubItem] carries an action callback, an optional icon, an optional title,
+ * Each [FabItem] carries an action callback, an optional icon, an optional title,
  * and independent style configurations for both the button and the title label.
  * The title is only rendered when the FAB variant explicitly enables it
  *
@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.dp
  * @param titleStyle Visual style of the title label. See [TitleStyle].
  */
 @Stable
-data class FabSubItem(
+data class FabItem(
     val onClick: () -> Unit,
     val title: String? = null,
     val icon: ImageVector? = null,

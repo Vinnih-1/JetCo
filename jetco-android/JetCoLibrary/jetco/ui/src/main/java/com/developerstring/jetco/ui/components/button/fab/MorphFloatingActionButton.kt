@@ -1,9 +1,7 @@
 package com.developerstring.jetco.ui.components.button.fab
 
-import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -17,11 +15,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
+import com.developerstring.jetco.ui.components.button.fab.base.DefaultFabItem
 import com.developerstring.jetco.ui.components.button.fab.base.DefaultFloatingActionButton
 import com.developerstring.jetco.ui.components.button.fab.base.DefaultMorphCard
-import com.developerstring.jetco.ui.components.button.fab.components.SubFabItem
+import com.developerstring.jetco.ui.components.button.fab.model.FabItem
 import com.developerstring.jetco.ui.components.button.fab.model.FabMainConfig
-import com.developerstring.jetco.ui.components.button.fab.model.FabSubItem
 import com.developerstring.jetco.ui.components.button.fab.scope.MorphCardScope
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
@@ -47,7 +45,7 @@ import kotlinx.coroutines.launch
  * ```
  *
  * @param expanded Whether the FAB is currently expanded into card form.
- * @param items List of [FabSubItem] sub-actions to display in the card grid.
+ * @param items List of [FabItem] sub-actions to display in the card grid.
  * @param modifier Modifier applied to the root [Box] container.
  * @param onClick Click handler for both the main FAB button and the card close button.
  * @param config Visual and layout configuration. See [FabMainConfig].
@@ -56,7 +54,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun MorphFloatingActionButton(
     expanded: Boolean,
-    items: List<FabSubItem>,
+    items: List<FabItem>,
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
     config: FabMainConfig = FabMainConfig(),
@@ -66,6 +64,68 @@ fun MorphFloatingActionButton(
     card: @Composable MorphCardScope.() -> Unit = {
         DefaultMorphCard(config = config, onClose = onClick, scope = this)
     }
+) {
+    MorphFloatingActionButtonBase(
+        expanded = expanded,
+        itemCount = items.size,
+        modifier = modifier,
+        onClick = onClick,
+        config = config,
+        content = content,
+        card = card,
+        itemContent = { index ->
+            val item = items[index]
+
+            DefaultFabItem(
+                item = item,
+                onClick = { item.onClick() },
+            )
+        }
+    )
+}
+
+@JvmName("MorphFloatingActionButtonCustom")
+@Composable
+fun MorphFloatingActionButton(
+    expanded: Boolean,
+    items: List<@Composable () -> Unit>,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {},
+    config: FabMainConfig = FabMainConfig(),
+    content: (@Composable () -> Unit) = {
+        DefaultFloatingActionButton(onClick = onClick, config = config)
+    },
+    card: @Composable MorphCardScope.() -> Unit = {
+        DefaultMorphCard(config = config, onClose = onClick, scope = this)
+    }
+) {
+    MorphFloatingActionButtonBase(
+        expanded = expanded,
+        itemCount = items.size,
+        modifier = modifier,
+        onClick = onClick,
+        config = config,
+        content = content,
+        card = card,
+        itemContent = { items[it]() }
+    )
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+internal fun MorphFloatingActionButtonBase(
+    expanded: Boolean,
+    itemCount: Int,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {},
+    config: FabMainConfig = FabMainConfig(),
+    content: (@Composable () -> Unit) = {
+        DefaultFloatingActionButton(onClick = onClick, config = config)
+    },
+    card: @Composable MorphCardScope.() -> Unit = {
+        DefaultMorphCard(config = config, onClose = onClick, scope = this)
+    },
+    itemContent: @Composable (index: Int) -> Unit
 ) {
     val morph = config.itemArrangement.morph
     val itemsContent: @Composable () -> Unit = {
@@ -77,7 +137,7 @@ fun MorphFloatingActionButton(
             verticalArrangement = Arrangement.spacedBy(morph.spacedBy),
             modifier = Modifier.fillMaxWidth()
         ) {
-            items.forEachIndexed { index, item ->
+            repeat(itemCount) { index ->
                 // key = index ensures remember is stable per item slot
                 val alpha = remember(index) { Animatable(0f) }
                 val scale = remember(index) { Animatable(0f) }
@@ -85,10 +145,10 @@ fun MorphFloatingActionButton(
 
                 LaunchedEffect(index) {
                     val transition = config.animation.enterTransition
-                    val stepMs = 300 / (items.size + 1)
+                    val stepMs = 300 / itemCount
                     val staggerDelay = config.animation.enterOrder.delayFor(
                         index = index,
-                        total = items.size,
+                        total = itemCount - 1,
                         stepMs = stepMs
                     )
 
@@ -125,16 +185,16 @@ fun MorphFloatingActionButton(
                     }
                 }
 
-                SubFabItem(
-                    item = item,
-                    onClick = { item.onClick() },
+                Box(
                     modifier = Modifier.graphicsLayer {
                         this.alpha = alpha.value
                         this.scaleX = scale.value
                         this.scaleY = scale.value
                         this.rotationZ = rotation.value
                     }
-                )
+                ) {
+                    itemContent(index)
+                }
             }
         }
     }
@@ -142,19 +202,15 @@ fun MorphFloatingActionButton(
         itemsContent = itemsContent
     )
 
-    Box(
+    AnimatedContent(
+        targetState = expanded,
+        label = "MorphFloatingActionButton",
         modifier = modifier
-            .animateContentSize(
-                animationSpec = tween(
-                    durationMillis = 300,
-                    easing = FastOutSlowInEasing
-                )
-            )
     ) {
-        if (expanded) {
+        if (it) {
             scope.card()
         } else {
-            Box(contentAlignment = Alignment.Center) {
+            Box {
                 content()
             }
         }
