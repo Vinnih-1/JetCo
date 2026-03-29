@@ -8,16 +8,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.developerstring.jetco.ui.components.button.fab.model.FabItem
 
 @Composable
@@ -42,24 +39,9 @@ internal fun DefaultFabItem(
         item.icon?.let { icon ->
             Icon(
                 imageVector = icon,
-                contentDescription = item.title,
+                contentDescription = null,
                 tint = Color.White,
-                modifier = Modifier.size(
-                    if (item.title != null) item.buttonStyle.size * 0.4f
-                    else item.buttonStyle.size * 0.55f
-                )
-            )
-        }
-
-        item.title?.let { title ->
-            Text(
-                text = title,
-                color = item.titleStyle.color,
-                fontSize = item.titleStyle.size.value.sp,
-                fontWeight = item.titleStyle.weight,
-                maxLines = item.titleStyle.maxLines,
-                overflow = TextOverflow.Ellipsis,
-                style = item.titleStyle.style
+                modifier = Modifier.size(item.buttonStyle.size * 0.55f)
             )
         }
     }
