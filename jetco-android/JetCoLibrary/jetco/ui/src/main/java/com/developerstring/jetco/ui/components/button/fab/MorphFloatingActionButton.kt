@@ -20,6 +20,7 @@ import com.developerstring.jetco.ui.components.button.fab.base.DefaultFloatingAc
 import com.developerstring.jetco.ui.components.button.fab.base.DefaultMorphCard
 import com.developerstring.jetco.ui.components.button.fab.model.FabItem
 import com.developerstring.jetco.ui.components.button.fab.model.FabMainConfig
+import com.developerstring.jetco.ui.components.button.fab.model.MorphFabItem
 import com.developerstring.jetco.ui.components.button.fab.scope.MorphCardScope
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
@@ -65,22 +66,20 @@ fun MorphFloatingActionButton(
         DefaultMorphCard(config = config, onClose = onClick, scope = this)
     }
 ) {
+    val items = items.map { item ->
+        MorphFabItem {
+            DefaultFabItem(item = item, onClick = { item.onClick() })
+        }
+    }
+
     MorphFloatingActionButtonBase(
         expanded = expanded,
-        itemCount = items.size,
+        items = items,
         modifier = modifier,
         onClick = onClick,
         config = config,
         content = content,
-        card = card,
-        itemContent = { index ->
-            val item = items[index]
-
-            DefaultFabItem(
-                item = item,
-                onClick = { item.onClick() },
-            )
-        }
+        card = card
     )
 }
 
@@ -88,7 +87,7 @@ fun MorphFloatingActionButton(
 @Composable
 fun MorphFloatingActionButton(
     expanded: Boolean,
-    items: List<@Composable () -> Unit>,
+    items: List<MorphFabItem>,
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
     config: FabMainConfig = FabMainConfig(),
@@ -101,13 +100,12 @@ fun MorphFloatingActionButton(
 ) {
     MorphFloatingActionButtonBase(
         expanded = expanded,
-        itemCount = items.size,
+        items = items,
         modifier = modifier,
         onClick = onClick,
         config = config,
         content = content,
-        card = card,
-        itemContent = { items[it]() }
+        card = card
     )
 }
 
@@ -115,7 +113,7 @@ fun MorphFloatingActionButton(
 @Composable
 internal fun MorphFloatingActionButtonBase(
     expanded: Boolean,
-    itemCount: Int,
+    items: List<MorphFabItem>,
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
     config: FabMainConfig = FabMainConfig(),
@@ -124,8 +122,7 @@ internal fun MorphFloatingActionButtonBase(
     },
     card: @Composable MorphCardScope.() -> Unit = {
         DefaultMorphCard(config = config, onClose = onClick, scope = this)
-    },
-    itemContent: @Composable (index: Int) -> Unit
+    }
 ) {
     val morph = config.itemArrangement.morph
     val itemsContent: @Composable () -> Unit = {
@@ -137,7 +134,7 @@ internal fun MorphFloatingActionButtonBase(
             verticalArrangement = Arrangement.spacedBy(morph.spacedBy),
             modifier = Modifier.fillMaxWidth()
         ) {
-            repeat(itemCount) { index ->
+            items.forEachIndexed { index, morphItem ->
                 // key = index ensures remember is stable per item slot
                 val alpha = remember(index) { Animatable(0f) }
                 val scale = remember(index) { Animatable(0f) }
@@ -145,10 +142,10 @@ internal fun MorphFloatingActionButtonBase(
 
                 LaunchedEffect(index) {
                     val transition = config.animation.enterTransition
-                    val stepMs = 300 / itemCount
+                    val stepMs = 300 / (items.size - 1)
                     val staggerDelay = config.animation.enterOrder.delayFor(
                         index = index,
-                        total = itemCount - 1,
+                        total = items.size - 1,
                         stepMs = stepMs
                     )
 
@@ -193,7 +190,7 @@ internal fun MorphFloatingActionButtonBase(
                         this.rotationZ = rotation.value
                     }
                 ) {
-                    itemContent(index)
+                    morphItem.content()
                 }
             }
         }

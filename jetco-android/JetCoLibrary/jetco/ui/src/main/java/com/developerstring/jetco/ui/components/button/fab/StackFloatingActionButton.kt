@@ -4,11 +4,11 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.VectorConverter
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -18,43 +18,20 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.times
+import com.developerstring.jetco.ui.components.button.fab.base.DefaultFabItem
 import com.developerstring.jetco.ui.components.button.fab.base.DefaultFloatingActionButton
-import com.developerstring.jetco.ui.components.button.fab.components.SubFabItem
+import com.developerstring.jetco.ui.components.button.fab.model.FabItem
 import com.developerstring.jetco.ui.components.button.fab.model.FabMainConfig
-import com.developerstring.jetco.ui.components.button.fab.model.FabSubItem
+import com.developerstring.jetco.ui.components.button.fab.model.StackDirection
+import com.developerstring.jetco.ui.components.button.fab.model.StackFabItem
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-/**
- * A Floating Action Button that expands sub-items linearly in a stack — above, to the left,
- * or to the right of the main button.
- *
- * Sub-items are pushed outward using animated offsets driven by tween animations.
- *
- * ## Example Usage:
- * ```kotlin
- * StackFloatingActionButton(
- *     expanded = isExpanded,
- *     items = listOf(
- *         FabSubItem(
- *             onClick = { }
- *         )
- *     )
- * )
- * ```
- *
- * @param expanded Whether the FAB is currently expanded, showing sub-items.
- * @param items List of [FabSubItem] sub-actions to display when expanded.
- * @param modifier Modifier applied to the root [Box] container.
- * @param onClick Click handler for the main FAB button.
- * @param config Visual and layout configuration. See [FabMainConfig].
- */
 @Composable
 fun StackFloatingActionButton(
     expanded: Boolean,
-    items: List<FabSubItem>,
+    items: List<FabItem>,
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
     config: FabMainConfig = FabMainConfig(),
@@ -62,45 +39,118 @@ fun StackFloatingActionButton(
         DefaultFloatingActionButton(onClick = onClick, config = config)
     }
 ) {
-    val direction = config.itemArrangement.stack.direction
+    val stackItems = items.map { item ->
+        StackFabItem {
+            DefaultFabItem(item = item, onClick = { item.onClick() })
+        }
+    }
+
+    StackFloatingActionButtonBase(
+        expanded = expanded,
+        items = stackItems,
+        modifier = modifier,
+        onClick = onClick,
+        config = config,
+        content = content
+    )
+}
+
+@JvmName("StackFloatingActionButtonCustom")
+@Composable
+fun StackFloatingActionButton(
+    expanded: Boolean,
+    items: List<StackFabItem>,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {},
+    config: FabMainConfig = FabMainConfig(),
+    content: (@Composable () -> Unit) = {
+        DefaultFloatingActionButton(onClick = onClick, config = config)
+    }
+) {
+    StackFloatingActionButtonBase(
+        expanded = expanded,
+        items = items,
+        modifier = modifier,
+        onClick = onClick,
+        config = config,
+        content = content
+    )
+}
+
+@Composable
+internal fun StackFloatingActionButtonBase(
+    expanded: Boolean,
+    items: List<StackFabItem>,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {},
+    config: FabMainConfig = FabMainConfig(),
+    content: (@Composable () -> Unit) = {
+        DefaultFloatingActionButton(onClick = onClick, config = config)
+    }
+) {
     val density = LocalDensity.current
     var fabWidthDp by remember { mutableStateOf(config.buttonStyle.size) }
     var fabHeightDp by remember { mutableStateOf(config.buttonStyle.size) }
     val spacedBy = config.itemArrangement.stack.spacedBy
 
-    // The Box anchor changes depending on which direction items spread
-    val alignment = when (direction) {
-        FabMainConfig.Orientation.Stack.Direction.TOP -> Alignment.BottomEnd
-        FabMainConfig.Orientation.Stack.Direction.START -> Alignment.CenterEnd
-        FabMainConfig.Orientation.Stack.Direction.END -> Alignment.CenterStart
+    val itemWidths = remember(items.size) {
+        mutableStateListOf<Dp>().also { list ->
+            repeat(items.size) { list.add(config.buttonStyle.size) }
+        }
     }
+    val itemHeights = remember(items.size) {
+        mutableStateListOf<Dp>().also { list ->
+            repeat(items.size) { list.add(config.buttonStyle.size) }
+        }
+    }
+
+    val topIndices = remember(items) { items.indices.filter { items[it].direction == StackDirection.TOP } }
+    val startIndices = remember(items) { items.indices.filter { items[it].direction == StackDirection.START } }
+    val endIndices = remember(items) { items.indices.filter { items[it].direction == StackDirection.END } }
 
     Box(
         modifier = modifier,
-        contentAlignment = alignment
+        contentAlignment = Alignment.BottomEnd
     ) {
         val fabOffsetX = remember { Animatable(0.dp, Dp.VectorConverter) }
         val fabOffsetY = remember { Animatable(0.dp, Dp.VectorConverter) }
-        // Sub-items — stacked in the direction defined by Orientation.Stack
-        items.forEachIndexed { index, item ->
+
+        items.forEachIndexed { index, stackItem ->
+            val direction = stackItem.direction
+
+            val groupIndices = when (direction) {
+                StackDirection.TOP -> topIndices
+                StackDirection.START -> startIndices
+                StackDirection.END -> endIndices
+            }
+            val positionInGroup = groupIndices.indexOf(index)
 
             val spacing = when (direction) {
-                FabMainConfig.Orientation.Stack.Direction.TOP ->
-                    fabHeightDp + spacedBy + index * (item.buttonStyle.size + spacedBy)
-                else ->
-                    fabWidthDp + spacedBy + index * (item.buttonStyle.size + spacedBy)
+                StackDirection.TOP -> {
+                    val heightBefore = (0 until positionInGroup).fold(0.dp) { acc, pos ->
+                        acc + itemHeights[groupIndices[pos]] + spacedBy
+                    }
+                    fabHeightDp + spacedBy + heightBefore
+                }
+                StackDirection.START,
+                StackDirection.END -> {
+                    val widthBefore = (0 until positionInGroup).fold(0.dp) { acc, pos ->
+                        acc + itemWidths[groupIndices[pos]] + spacedBy
+                    }
+                    fabWidthDp + spacedBy + widthBefore
+                }
             }
 
-            // Each orientation moves items along a different axis
             val targetOffsetX = when (direction) {
-                FabMainConfig.Orientation.Stack.Direction.START -> -spacing
-                FabMainConfig.Orientation.Stack.Direction.END -> spacing
-                else -> 0.dp
+                StackDirection.START -> -spacing
+                StackDirection.END -> spacing
+                StackDirection.TOP -> -(fabWidthDp - itemWidths[index]) / 2
             }
 
             val targetOffsetY = when (direction) {
-                FabMainConfig.Orientation.Stack.Direction.TOP -> -spacing
-                else -> 0.dp
+                StackDirection.TOP -> -spacing
+                StackDirection.START,
+                StackDirection.END -> -(fabHeightDp - itemHeights[index]) / 2
             }
 
             val rotation = remember { Animatable(0f) }
@@ -109,11 +159,17 @@ fun StackFloatingActionButton(
             val offsetX = remember { Animatable(0.dp, Dp.VectorConverter) }
             val offsetY = remember { Animatable(0.dp, Dp.VectorConverter) }
 
-            LaunchedEffect(expanded) {
-                val stepMs = 300 / (items.size + 1)
+            val groupSize = groupIndices.size
+
+            LaunchedEffect(expanded, targetOffsetX, targetOffsetY) {
+                val stepMs = 300 / groupSize.coerceAtLeast(1)
                 val order = if (expanded) config.animation.enterOrder else config.animation.exitOrder
                 val transition = if (expanded) config.animation.enterTransition else config.animation.exitTransition
-                val staggerDelay = order.delayFor(index = index, total = items.size, stepMs = stepMs)
+                val staggerDelay = order.delayFor(
+                    index = positionInGroup,
+                    total = (groupSize - 1).coerceAtLeast(0),
+                    stepMs = stepMs
+                )
 
                 delay(staggerDelay)
 
@@ -163,22 +219,23 @@ fun StackFloatingActionButton(
                 }
             }
 
-            SubFabItem(
-                item = item,
+            Box(
                 modifier = Modifier
                     .offset(x = offsetX.value + fabOffsetX.value, y = offsetY.value + fabOffsetY.value)
-                    .padding(
-                        end = if (direction == FabMainConfig.Orientation.Stack.Direction.TOP) {
-                            (fabWidthDp - item.buttonStyle.size) / 2
-                        } else 0.dp
-                    ).graphicsLayer {
+                    .onSizeChanged { size ->
+                        val width = with(density) { size.width.toDp() }
+                        val height = with(density) { size.height.toDp() }
+                        if (itemWidths[index] != width) itemWidths[index] = width
+                        if (itemHeights[index] != height) itemHeights[index] = height
+                    }.graphicsLayer {
                         this.alpha = alpha.value
                         this.scaleX = scale.value
                         this.scaleY = scale.value
                         this.rotationZ = rotation.value
-                    },
-                onClick = { item.onClick() }
-            )
+                    }
+            ) {
+                stackItem.content()
+            }
         }
 
         val fabScale = remember { Animatable(1f) }

@@ -1,4 +1,4 @@
-package com.developerstring.jetco.ui.components.button.fab.model
+package com.developerstring.jetco.ui.components.button.fab.transition
 
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.ui.unit.Dp

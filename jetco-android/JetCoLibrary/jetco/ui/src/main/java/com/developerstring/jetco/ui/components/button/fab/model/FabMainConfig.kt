@@ -10,6 +10,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.developerstring.jetco.ui.components.button.fab.transition.FabButtonTransition
+import com.developerstring.jetco.ui.components.button.fab.transition.FabItemTransition
 
 /**
  * Main configuration class for all Floating Action Button variants in JetCo.
@@ -47,18 +49,8 @@ data class FabMainConfig(
         }
 
         data class Stack(
-            val direction: Direction = Direction.TOP,
             val spacedBy: Dp = 40.dp
-        ) : Orientation {
-            enum class Direction {
-                /** Spreads items upward above the main FAB. */
-                TOP,
-                /** Spreads items to the left of the main FAB. */
-                START,
-                /** Spreads items to the right of the main FAB. */
-                END
-            }
-        }
+        ) : Orientation
 
         /**
          * Morph orientation that expands the main FAB into a card grid.

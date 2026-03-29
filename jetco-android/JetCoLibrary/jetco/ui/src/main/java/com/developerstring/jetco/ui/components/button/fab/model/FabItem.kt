@@ -15,7 +15,10 @@ import androidx.compose.ui.unit.dp
  *
  * Each [FabItem] carries an action callback, an optional icon, an optional title,
  * and independent style configurations for both the button and the title label.
- * The title is only rendered when the FAB variant explicitly enables it
+ * The title is only rendered when the FAB variant explicitly enables it.
+ *
+ * For [StackFloatingActionButton], each item can also carry a [direction] that controls
+ * which side of the main FAB it spreads toward.
  *
  * @param onClick Action invoked when the sub-item is clicked.
  * @param title Optional label displayed below the icon.

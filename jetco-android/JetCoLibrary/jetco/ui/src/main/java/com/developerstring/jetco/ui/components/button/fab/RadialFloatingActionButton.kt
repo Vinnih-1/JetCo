@@ -4,7 +4,6 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.VectorConverter
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -15,8 +14,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.developerstring.jetco.ui.components.button.fab.base.DefaultFabItem
 import com.developerstring.jetco.ui.components.button.fab.base.DefaultFloatingActionButton
-import com.developerstring.jetco.ui.components.button.fab.model.FabMainConfig
 import com.developerstring.jetco.ui.components.button.fab.model.FabItem
+import com.developerstring.jetco.ui.components.button.fab.model.FabMainConfig
+import com.developerstring.jetco.ui.components.button.fab.model.RadialFabItem
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -59,22 +59,19 @@ fun RadialFloatingActionButton(
         DefaultFloatingActionButton(onClick = onClick, config = config)
     }
 ) {
+    val items = items.map { item ->
+        RadialFabItem {
+            DefaultFabItem(item = item, onClick = { item.onClick() })
+        }
+    }
+
     RadialFloatingActionButtonBase(
         expanded = expanded,
-        itemCount = items.size,
+        items = items,
         modifier = modifier,
         onClick = onClick,
         config = config,
-        content = content,
-        itemContent = { index ->
-            val item = items[index]
-
-            DefaultFabItem(
-                item = item,
-                modifier = Modifier.padding(end = (config.buttonStyle.size - item.buttonStyle.size) / 2),
-                onClick = { item.onClick() }
-            )
-        }
+        content = content
     )
 }
 
@@ -82,7 +79,7 @@ fun RadialFloatingActionButton(
 @Composable
 fun RadialFloatingActionButton(
     expanded: Boolean,
-    items: List<@Composable () -> Unit>,
+    items: List<RadialFabItem>,
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
     config: FabMainConfig = FabMainConfig(),
@@ -92,26 +89,24 @@ fun RadialFloatingActionButton(
 ) {
     RadialFloatingActionButtonBase(
         expanded = expanded,
-        itemCount = items.size,
+        items = items,
         modifier = modifier,
         onClick = onClick,
         config = config,
-        content = content,
-        itemContent = { items[it]() }
+        content = content
     )
 }
 
 @Composable
 internal fun RadialFloatingActionButtonBase(
     expanded: Boolean,
-    itemCount: Int,
+    items: List<RadialFabItem>,
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
     config: FabMainConfig = FabMainConfig(),
     content: (@Composable () -> Unit) = {
         DefaultFloatingActionButton(onClick = onClick, config = config)
-    },
-    itemContent: @Composable (index: Int) -> Unit
+    }
 ) {
     Box(
         modifier = modifier,
@@ -121,14 +116,14 @@ internal fun RadialFloatingActionButtonBase(
         val fabOffsetY = remember { Animatable(0.dp, Dp.VectorConverter) }
 
         // Sub-items — laid out behind the main FAB
-        repeat(itemCount) { index ->
+        items.forEachIndexed { index, radialItem ->
             val startAngle = config.itemArrangement.radial.arc.start
             val endAngle = config.itemArrangement.radial.arc.end
 
-            val angleDeg = if (itemCount == 1) {
+            val angleDeg = if (items.size == 1) {
                 (startAngle + endAngle) / 2.0  // single item lands at the midpoint of the arc
             } else {
-                startAngle + (endAngle - startAngle) * (index.toDouble() / (itemCount - 1))
+                startAngle + (endAngle - startAngle) * (index.toDouble() / (items.size - 1))
             }
             val angleRad = Math.toRadians(angleDeg)
 
@@ -142,10 +137,10 @@ internal fun RadialFloatingActionButtonBase(
             val offsetY = remember { Animatable(0.dp, Dp.VectorConverter) }
 
             LaunchedEffect(expanded) {
-                val stepMs = 300 / itemCount
+                val stepMs = 300 / (items.size - 1)
                 val order = if (expanded) config.animation.enterOrder else config.animation.exitOrder
                 val transition = if (expanded) config.animation.enterTransition else config.animation.exitTransition
-                val staggerDelay = order.delayFor(index = index, total = (itemCount - 1), stepMs = stepMs)
+                val staggerDelay = order.delayFor(index = index, total = (items.size - 1), stepMs = stepMs)
 
                 delay(staggerDelay)
 
@@ -206,7 +201,7 @@ internal fun RadialFloatingActionButtonBase(
                         this.rotationZ = rotation.value
                     }
             ) {
-                itemContent(index)
+                radialItem.content()
             }
         }
 
