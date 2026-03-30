@@ -7,20 +7,19 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.developerstring.jetco.ui.components.button.fab.StackFloatingActionButton
+import com.developerstring.jetco.ui.components.button.fab.MorphFloatingActionButton
+import com.developerstring.jetco.ui.components.button.fab.RadialFloatingActionButton
 
 /**
- * Data model representing a single sub-action item displayed by a FAB variant.
+ * Data model representing a standard item in a Floating Action Button (FAB) menu.
  *
- * Each [FabItem] carries an action callback, an optional icon, an optional title,
- * and independent style configurations for both the button and the title label.
- * The title is only rendered when the FAB variant explicitly enables it.
+ * This is the default item type used by [RadialFloatingActionButton], [StackFloatingActionButton],
+ * and [MorphFloatingActionButton]. It consists of an icon, a click action, and visual styling.
  *
- * For [StackFloatingActionButton], each item can also carry a [direction] that controls
- * which side of the main FAB it spreads toward.
- *
- * @param onClick Action invoked when the sub-item is clicked.
- * @param icon Optional icon displayed inside the sub-item button.
- * @param buttonStyle Visual style of the sub-item button. See [ButtonStyle].
+ * @property onClick Callback triggered when this specific item is clicked.
+ * @property icon to be displayed inside the item button.
+ * @property buttonStyle Visual configuration for this item, including color, shape, and size.
  */
 @Stable
 data class FabItem(
@@ -30,11 +29,11 @@ data class FabItem(
 ) {
 
     /**
-     * Visual style configuration for the sub-item button.
+     * Visual style configuration for an individual [FabItem].
      *
-     * @param color Background color of the sub-item button. Default is Material blue.
-     * @param shape Shape of the sub-item button. Default is [CircleShape].
-     * @param size Diameter of the sub-item button. Default is 52.dp.
+     * @property color Background color of the item button.
+     * @property shape Shape of the item button. Default is [CircleShape].
+     * @property size Diameter/Height of the item button. Default is 52.dp.
      */
     @Stable
     data class ButtonStyle(

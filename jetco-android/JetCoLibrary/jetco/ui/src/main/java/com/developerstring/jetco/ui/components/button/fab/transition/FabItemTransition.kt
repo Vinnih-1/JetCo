@@ -8,6 +8,23 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.ui.unit.Dp
 
+/**
+ * Describes how an item (FAB) animates when it enters or exits the screen.
+ *
+ * Transitions can be combined using the `+` operator.
+ * Each factory function returns a new [FabItemTransition] that only defines the specific
+ * animation spec for its property.
+ *
+ * ## Example:
+ * ```kotlin
+ * val myItemTransition = FabItemTransition.Spring() + FabItemTransition.Fade()
+ * ```
+ *
+ * @property offsetSpec Animation for the item's movement (displacement).
+ * @property alphaSpec Animation for the item's transparency.
+ * @property scaleSpec Animation for the item's size (X and Y).
+ * @property rotate Configuration for the item's rotation.
+ */
 class FabItemTransition(
     val offsetSpec: AnimationSpec<Dp>? = null,
     val alphaSpec: AnimationSpec<Float>? = null,

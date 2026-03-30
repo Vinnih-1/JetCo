@@ -29,6 +29,26 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+/**
+ * A floating action button that expands items in a linear stack (Vertical or Horizontal).
+ *
+ * This component allows for expanding items in multiple directions (TOP, START, END)
+ * simultaneously. It also provides an [onExpandChange] callback that reports the total
+ * displacement of the main button, which can be used to "push" other UI elements
+ * (like screen content) out of the way.
+ *
+ * @param expanded Whether the FAB is currently showing its items.
+ * @param items List of [FabItem] to be displayed as buttons. Defaults to [StackDirection.TOP].
+ * @param modifier Modifier applied to the root container.
+ * @param onClick Callback triggered when the main FAB button is clicked.
+ * @param config Configuration for styling and animations. See [FabMainConfig].
+ * @param onExpandChange Callback that provides [StackExpandOffset]
+ * containing the total width/height of expanded main FAB + [FabMainConfig.Orientation.Stack.spacingPadding].
+ * @param content Optional custom composable for the main FAB button.
+ *
+ * @see StackExpandOffset for handling screen content displacement.
+ * @see StackFabItem for custom composable items with specific directions.
+ */
 @Composable
 fun StackFloatingActionButton(
     expanded: Boolean,
@@ -58,6 +78,19 @@ fun StackFloatingActionButton(
     )
 }
 
+/**
+ * A floating action button that expands custom [StackFabItem]s in a linear stack.
+ *
+ * Use this overload to specify different directions for each item or to use custom composables.
+ *
+ * @param expanded Whether the FAB is currently showing its items.
+ * @param items List of [StackFabItem] with direction and custom content.
+ * @param modifier Modifier applied to the root container.
+ * @param onClick Callback triggered when the main FAB button is clicked.
+ * @param config Configuration for styling and animations.
+ * @param onExpandChange Callback that provides [StackExpandOffset] data.
+ * @param content Optional custom composable for the main FAB button.
+ */
 @JvmName("StackFloatingActionButtonCustom")
 @Composable
 fun StackFloatingActionButton(

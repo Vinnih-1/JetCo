@@ -27,29 +27,22 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /**
- * A Floating Action Button that morphs into an expanded card grid when activated.
+ * A floating action button that morphs into a card containing a grid of actions.
  *
- * When collapsed, it displays a standard circular FAB. When expanded, it animates into
- * a rounded card containing a title header with a close button, and a configurable grid
- * of sub-action items. Sub-items fade in one by one with a staggered entrance animation.
+ * This component provides a circular FAB that, when expanded, smoothly transitions
+ * into a rectangular card layout. The card contains a grid of items arranged
+ * in a [FlowRow], with customizable header space and item arrangement.
  *
- * ## Example Usage:
- * ```kotlin
- * MorphFloatingActionButton(
- *     expanded = isExpanded,
- *     items = listOf(
- *         FabSubItem(
- *             onClick = { }
- *         )
- *     )
- * )
- * ```
+ * @param expanded Whether the FAB is currently morphed into a card.
+ * @param items List of [FabItem] to be displayed in the card grid.
+ * @param modifier Modifier applied to the root container.
+ * @param onClick Callback triggered when the FAB is clicked or the card's close action is invoked.
+ * @param config Comprehensive configuration for styling and layout. See [FabMainConfig].
+ * @param content Optional custom composable for the collapsed FAB button.
+ * @param card Optional custom composable for the expanded card shell. Use [MorphCardScope.MorphItems] to place the grid.
  *
- * @param expanded Whether the FAB is currently expanded into card form.
- * @param items List of [FabItem] sub-actions to display in the card grid.
- * @param modifier Modifier applied to the root [Box] container.
- * @param onClick Click handler for both the main FAB button and the card close button.
- * @param config Visual and layout configuration. See [FabMainConfig].
+ * @see FabMainConfig for detailed arrangement and animation options.
+ * @see MorphCardScope for customizing the expanded card layout.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -83,6 +76,20 @@ fun MorphFloatingActionButton(
     )
 }
 
+/**
+ * A floating action button that morphs into a card with custom [MorphFabItem]s.
+ *
+ * Use this overload when you need to provide fully custom composables for each item
+ * in the grid instead of the standard icon/button pair.
+ *
+ * @param expanded Whether the FAB is currently morphed into a card.
+ * @param items List of [MorphFabItem] containing custom composables.
+ * @param modifier Modifier applied to the root container.
+ * @param onClick Callback triggered when the FAB is clicked.
+ * @param config Configuration for styling and layout.
+ * @param content Optional custom composable for the collapsed FAB button.
+ * @param card Optional custom composable for the expanded card shell.
+ */
 @JvmName("MorphFloatingActionButtonCustom")
 @Composable
 fun MorphFloatingActionButton(
@@ -142,7 +149,7 @@ internal fun MorphFloatingActionButtonBase(
 
                 LaunchedEffect(index) {
                     val transition = config.animation.enterTransition
-                    val stepMs = 300 / (items.size - 1)
+                    val stepMs = 300 / (items.size - 1).coerceAtLeast(1)
                     val staggerDelay = config.animation.enterOrder.delayFor(
                         index = index,
                         total = items.size - 1,

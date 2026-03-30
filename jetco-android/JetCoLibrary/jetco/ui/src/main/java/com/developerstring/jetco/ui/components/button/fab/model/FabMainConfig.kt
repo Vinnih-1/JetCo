@@ -1,7 +1,5 @@
 package com.developerstring.jetco.ui.components.button.fab.model
 
-import androidx.compose.animation.core.AnimationSpec
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -14,11 +12,15 @@ import com.developerstring.jetco.ui.components.button.fab.transition.FabButtonTr
 import com.developerstring.jetco.ui.components.button.fab.transition.FabItemTransition
 
 /**
- * Main configuration class for all Floating Action Button variants in JetCo.
+ * Main configuration class for the Floating Action Button (FAB) family.
  *
- * @param buttonStyle Visual appearance of the main FAB button. See [ButtonStyle].
- * @param itemArrangement Layout and orientation of sub-items. See [ItemArrangement].
- * @param animation Animation timing and spec used across all transitions. See [Animation].
+ * This class centralizes all visual and behavioral settings, including button styling,
+ * item arrangement patterns (Radial, Stack, Morph), and animation specifications
+ * for both the main button and its items.
+ *
+ * @property buttonStyle Visual styling for the main FAB (color, shape, size, etc.).
+ * @property itemArrangement Configuration for how items are positioned when expanded.
+ * @property animation Animation specs for entry/exit transitions and stagger orders.
  */
 @Stable
 data class FabMainConfig(
@@ -28,12 +30,15 @@ data class FabMainConfig(
 ) {
 
     /**
-     * Sealed interface representing the available layout orientations for FAB sub-items.
-     *
-     * Use [Radial] for arc-based spreading, [Stack] for linear stacking,
-     * and [Morph] for the card expansion layout.
+     * Defines the layout orientation and specific parameters for FAB expansion.
      */
     sealed interface Orientation {
+        /**
+         * Radial orientation that expands items in an arc.
+         *
+         * @property arc The direction and span of the arc (END, START, CENTER).
+         * @property radius The distance from the main FAB to the sub-items.
+         */
         data class Radial(
             val arc: Arc = Arc.END,
             val radius: Dp = 80.dp
@@ -48,6 +53,12 @@ data class FabMainConfig(
             }
         }
 
+        /**
+         * Stack orientation that expands items linearly.
+         *
+         * @property spacedBy Gap between consecutive items in the stack.
+         * @property spacingPadding Extra padding used to report total expansion size in [StackExpandOffset].
+         */
         data class Stack(
             val spacedBy: Dp = 40.dp,
             val spacingPadding: Dp = 24.dp
@@ -56,11 +67,11 @@ data class FabMainConfig(
         /**
          * Morph orientation that expands the main FAB into a card grid.
          *
-         * @param columns Number of sub-item columns in the card grid. Default is 2.
-         * @param spacedBy Gap between sub-items inside the grid. Default is 12.dp.
-         * @param headerSpace Space between the card header and the item grid. Default is 20.dp.
-         * @param width Total width of the expanded card. Default is 250.dp.
-         * @param cardShape Shape of the expanded card. Default is [RoundedCornerShape] with 24.dp.
+         * @property columns Number of item columns in the card grid.
+         * @property spacedBy Gap between items inside the grid.
+         * @property headerSpace Space between the card header and the item grid.
+         * @property width Total width of the expanded card.
+         * @property cardShape Shape of the expanded card.
          */
         data class Morph(
             val columns: Int = 2,
@@ -72,11 +83,14 @@ data class FabMainConfig(
     }
 
     /**
-     * Animation configuration shared across all FAB variants.
+     * Animation configuration for the FAB family.
      *
-     * @param durationMillis Duration of each animation in milliseconds. Default is 300.
-     * @param easing Easing curve applied to tween-based animations. Default is [FastOutSlowInEasing].
-     * @param animationSpec Full [AnimationSpec] used for float animations such as alpha and rotation.
+     * @property enterOrder The order in which items appear (FIFO, FILO, ALL).
+     * @property exitOrder The order in which items disappear.
+     * @property enterTransition Combined transitions for sub-item entry.
+     * @property exitTransition Combined transitions for sub-item exit.
+     * @property buttonEnterTransition Transitions applied to the main FAB on expansion.
+     * @property buttonExitTransition Transitions applied to the main FAB on collapse.
      */
     @Stable
     open class Animation(
@@ -88,10 +102,16 @@ data class FabMainConfig(
         val buttonExitTransition: FabButtonTransition = FabButtonTransition.Rotate(0f)
     )
 
+    /**
+     * Controls the sequence of staggered animations for sub-items.
+     */
     @Stable
     enum class StaggerOrder {
+        /** First In, First Out: items animate in the order they appear in the list. */
         FIFO,
+        /** First In, Last Out: items animate in reverse order. */
         FILO,
+        /** All items animate simultaneously. */
         ALL;
 
         internal fun delayFor(index: Int, total: Int, stepMs: Int): Long = when (this) {
@@ -104,28 +124,23 @@ data class FabMainConfig(
     /**
      * Visual style configuration for the main FAB button.
      *
-     * @param color Background color of the main FAB. Default is Material blue.
-     * @param shape Shape of the main FAB button. Default is [CircleShape].
-     * @param horizontalSpace Horizontal gap between icon and text when both are present. Default is 12.dp.
-     * @param size Diameter (and height) of the main FAB. Width expands via [defaultMinSize] when text is added. Default is 72.dp.
-     * @param iconRotation Target rotation angle of the icon when the FAB is expanded. Default is 45f.
-     * @param padding Internal padding applied inside the FAB button row. Default is no padding.
+     * @property color Background color of the main FAB.
+     * @property shape Shape of the main FAB button.
+     * @property size Diameter/Height of the main FAB.
+     * @property iconRotation Target rotation of the icon when expanded (legacy support).
+     * @property padding Internal padding for the button content.
      */
     @Stable
     data class ButtonStyle(
         val color: Color = Color(0xFF1976D2),
         val shape: Shape = CircleShape,
-        val horizontalSpace: Dp = 12.dp,
         val size: Dp = 72.dp,
         val iconRotation: Float = 45f,
         val padding: PaddingValues = PaddingValues()
     )
 
     /**
-     * Layout and orientation configuration for FAB sub-items.
-     *
-     * @param stack Stack direction orientation. Default is [Orientation.Stack.TOP].
-     * @param morph Morph card configuration. Default is [Orientation.Morph].
+     * Container for all arrangement-specific settings.
      */
     @Stable
     data class ItemArrangement(

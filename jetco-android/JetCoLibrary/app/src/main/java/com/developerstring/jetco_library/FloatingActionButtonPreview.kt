@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -55,6 +56,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -115,6 +117,34 @@ fun FloatingActionButtonPreview() {
     )
 
     Scaffold(
+        topBar = {
+            FlowRow(
+                maxItemsInEachRow = 4,
+                modifier = Modifier
+                    .statusBarsPadding()
+                    .fillMaxWidth()
+                    .background(Color.White),
+                horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally)
+            ) {
+                FabVariant.entries.forEach { variant ->
+                    FilterChip(
+                        selected = selected == variant,
+                        onClick = { selected = variant },
+                        label = {
+                            Text(
+                                text = variant.label,
+                                fontSize = 11.sp,
+                                fontWeight = if (selected == variant) FontWeight.Bold else FontWeight.Normal
+                            )
+                        },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = Orange,
+                            selectedLabelColor = Color.White
+                        )
+                    )
+                }
+            }
+        },
         floatingActionButton = {
             AnimatedContent(
                 targetState = selected,
@@ -145,7 +175,7 @@ fun FloatingActionButtonPreview() {
                     .padding(horizontal = 16.dp, vertical = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                items((1..13).toList()) { i ->
+                items((1..12).toList()) { i ->
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -185,34 +215,6 @@ fun FloatingActionButtonPreview() {
                             }
                         }
                     }
-                }
-            }
-
-            FlowRow(
-                maxItemsInEachRow = 4,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color.White)
-                    .navigationBarsPadding()
-                    .padding(horizontal = 12.dp, vertical = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally)
-            ) {
-                FabVariant.entries.forEach { variant ->
-                    FilterChip(
-                        selected = selected == variant,
-                        onClick = { selected = variant },
-                        label = {
-                            Text(
-                                text = variant.label,
-                                fontSize = 11.sp,
-                                fontWeight = if (selected == variant) FontWeight.Bold else FontWeight.Normal
-                            )
-                        },
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = Orange,
-                            selectedLabelColor = Color.White
-                        )
-                    )
                 }
             }
         }
@@ -547,10 +549,16 @@ private fun StackMixedFab() {
 @Composable
 private fun StackPushFab(onExpandChange: (StackExpandOffset) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
+    val focusManager = LocalFocusManager.current
 
     StackFloatingActionButton(
         expanded = expanded,
-        onClick = { expanded = !expanded },
+        onClick = {
+            expanded = !expanded
+            if (!expanded) {
+                focusManager.clearFocus()
+            }
+        },
         onExpandChange = onExpandChange,
         items = listOf(
             StackFabItem(direction = StackDirection.TOP) {

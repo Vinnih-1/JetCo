@@ -24,29 +24,21 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 /**
- * A Floating Action Button that expands sub-items radially in an arc around the main button.
+ * A floating action button that expands items in a radial (arc) pattern.
  *
- * When expanded, sub-items fan out in a configurable arc using spring physics with a staggered
- * delay, creating a natural and lively feel. When collapsed, items snap back with a clean tween.
- * The arc direction and radius are fully configurable via [FabMainConfig.ItemArrangement].
+ * This component provides a main FAB that, when expanded, reveals a set of items
+ * arranged along a configurable arc. It supports both simple [FabItem]s (icons with actions)
+ * and custom [RadialFabItem]s for full composable control.
  *
- * ## Example Usage:
- * ```kotlin
- * RadialFloatingActionButton(
- *     expanded = isExpanded,
- *     items = listOf(
- *         FabSubItem(
- *             onClick = { }
- *         )
- *     )
- * )
- * ```
+ * @param expanded Whether the FAB is currently showing its items.
+ * @param items List of [FabItem] to be displayed as buttons.
+ * @param modifier Modifier applied to the root container of the FAB.
+ * @param onClick Callback triggered when the main FAB button is clicked.
+ * @param config Configuration for styling and animations. See [FabMainConfig].
+ * @param content Optional custom composable for the main FAB button. Defaults to [DefaultFloatingActionButton].
  *
- * @param expanded Whether the FAB is currently expanded, showing sub-items.
- * @param items List of [FabItem] sub-actions to display when expanded.
- * @param modifier Modifier applied to the root [Box] container.
- * @param onClick Click handler for the main FAB button.
- * @param config Visual and layout configuration. See [FabMainConfig].
+ * @see FabMainConfig for detailed arrangement and animation options.
+ * @see FabItem for item data model.
  */
 @Composable
 fun RadialFloatingActionButton(
@@ -75,6 +67,19 @@ fun RadialFloatingActionButton(
     )
 }
 
+/**
+ * A floating action button that expands custom [RadialFabItem]s in a radial (arc) pattern.
+ *
+ * Use this overload when you need to provide fully custom composables for each item
+ * instead of the standard icon/button pair.
+ *
+ * @param expanded Whether the FAB is currently showing its items.
+ * @param items List of [RadialFabItem] containing custom composables.
+ * @param modifier Modifier applied to the root container of the FAB.
+ * @param onClick Callback triggered when the main FAB button is clicked.
+ * @param config Configuration for styling and animations.
+ * @param content Optional custom composable for the main FAB button.
+ */
 @JvmName("RadialFloatingActionButtonCustom")
 @Composable
 fun RadialFloatingActionButton(
@@ -137,7 +142,7 @@ internal fun RadialFloatingActionButtonBase(
             val offsetY = remember { Animatable(0.dp, Dp.VectorConverter) }
 
             LaunchedEffect(expanded) {
-                val stepMs = 300 / (items.size - 1)
+                val stepMs = 300 / (items.size - 1).coerceAtLeast(1)
                 val order = if (expanded) config.animation.enterOrder else config.animation.exitOrder
                 val transition = if (expanded) config.animation.enterTransition else config.animation.exitTransition
                 val staggerDelay = order.delayFor(index = index, total = (items.size - 1), stepMs = stepMs)
