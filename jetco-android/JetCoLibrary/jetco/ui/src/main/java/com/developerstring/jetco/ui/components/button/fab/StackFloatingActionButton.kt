@@ -23,6 +23,7 @@ import com.developerstring.jetco.ui.components.button.fab.base.DefaultFloatingAc
 import com.developerstring.jetco.ui.components.button.fab.model.FabItem
 import com.developerstring.jetco.ui.components.button.fab.model.FabMainConfig
 import com.developerstring.jetco.ui.components.button.fab.model.StackDirection
+import com.developerstring.jetco.ui.components.button.fab.model.StackExpandOffset
 import com.developerstring.jetco.ui.components.button.fab.model.StackFabItem
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
@@ -35,6 +36,7 @@ fun StackFloatingActionButton(
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
     config: FabMainConfig = FabMainConfig(),
+    onExpandChange: (StackExpandOffset) -> Unit = {},
     content: (@Composable () -> Unit) = {
         DefaultFloatingActionButton(onClick = onClick, config = config)
     }
@@ -51,6 +53,7 @@ fun StackFloatingActionButton(
         modifier = modifier,
         onClick = onClick,
         config = config,
+        onExpandChange = onExpandChange,
         content = content
     )
 }
@@ -63,6 +66,7 @@ fun StackFloatingActionButton(
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
     config: FabMainConfig = FabMainConfig(),
+    onExpandChange: (StackExpandOffset) -> Unit = {},
     content: (@Composable () -> Unit) = {
         DefaultFloatingActionButton(onClick = onClick, config = config)
     }
@@ -73,6 +77,7 @@ fun StackFloatingActionButton(
         modifier = modifier,
         onClick = onClick,
         config = config,
+        onExpandChange = onExpandChange,
         content = content
     )
 }
@@ -84,6 +89,7 @@ internal fun StackFloatingActionButtonBase(
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
     config: FabMainConfig = FabMainConfig(),
+    onExpandChange: (StackExpandOffset) -> Unit = {},
     content: (@Composable () -> Unit) = {
         DefaultFloatingActionButton(onClick = onClick, config = config)
     }
@@ -92,6 +98,7 @@ internal fun StackFloatingActionButtonBase(
     var fabWidthDp by remember { mutableStateOf(config.buttonStyle.size) }
     var fabHeightDp by remember { mutableStateOf(config.buttonStyle.size) }
     val spacedBy = config.itemArrangement.stack.spacedBy
+    val spacingPadding = config.itemArrangement.stack.spacingPadding
 
     val itemWidths = remember(items.size) {
         mutableStateListOf<Dp>().also { list ->
@@ -244,6 +251,15 @@ internal fun StackFloatingActionButtonBase(
         LaunchedEffect(expanded) {
             val btnTransition = if (expanded) config.animation.buttonEnterTransition
             else config.animation.buttonExitTransition
+
+            if (expanded) {
+                onExpandChange(StackExpandOffset(
+                    offsetY = fabHeightDp + spacingPadding,
+                    offsetX = fabWidthDp + spacingPadding
+                ))
+            } else {
+                onExpandChange(StackExpandOffset())
+            }
 
             coroutineScope {
                 launch {

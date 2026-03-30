@@ -1,6 +1,9 @@
 package com.developerstring.jetco_library
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
@@ -14,12 +17,20 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Call
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.AccountBox
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
@@ -27,13 +38,15 @@ import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.MailOutline
-import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Place
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -53,6 +66,7 @@ import com.developerstring.jetco.ui.components.button.fab.model.FabMainConfig
 import com.developerstring.jetco.ui.components.button.fab.model.FabMainConfig.Orientation
 import com.developerstring.jetco.ui.components.button.fab.model.MorphFabItem
 import com.developerstring.jetco.ui.components.button.fab.model.StackDirection
+import com.developerstring.jetco.ui.components.button.fab.model.StackExpandOffset
 import com.developerstring.jetco.ui.components.button.fab.model.StackFabItem
 import com.developerstring.jetco.ui.components.button.fab.transition.FabButtonTransition
 import com.developerstring.jetco.ui.components.button.fab.transition.FabItemTransition
@@ -69,10 +83,10 @@ private val Gold    = Color(0xFFFFC107)
 private enum class FabVariant(val label: String) {
     RADIAL_CLASSIC("Radial"),
     RADIAL_FULL_ARC("Radial 2"),
-    RADIAL_EXPLOSION("Explosive"),
     STACK_VERTICAL("Stack 1"),
     STACK_MIXED("Stack 2"),
     STACK_HORIZONTAL("H-Stack"),
+    STACK_PUSH("Push"),
     MORPH_GRID("Morph"),
     MORPH_DETAIL("M-Detail")
 }
@@ -80,55 +94,126 @@ private enum class FabVariant(val label: String) {
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun FloatingActionButtonPreview() {
-    var selected by remember { mutableStateOf(FabVariant.RADIAL_CLASSIC) }
+    var selected by remember { mutableStateOf(FabVariant.STACK_PUSH) }
+    var expandOffset by remember { mutableStateOf(StackExpandOffset()) }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        AnimatedContent(
-            targetState = selected,
-            transitionSpec = { fadeIn() togetherWith fadeOut() },
-            label = "fab_switch",
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(end = 24.dp, bottom = 180.dp)
-        ) { variant ->
-            when (variant) {
-                FabVariant.RADIAL_CLASSIC -> RadialClassicFab()
-                FabVariant.RADIAL_FULL_ARC -> RadialFullArcFab()
-                FabVariant.RADIAL_EXPLOSION -> RadialExplosionFab()
-                FabVariant.STACK_VERTICAL -> StackVerticalFab()
-                FabVariant.STACK_MIXED -> StackMixedFab()
-                FabVariant.STACK_HORIZONTAL -> StackHorizontalFab()
-                FabVariant.MORPH_GRID -> MorphGridFab()
-                FabVariant.MORPH_DETAIL -> MorphDetailedFab()
+    val screenOffsetY by animateDpAsState(
+        targetValue = -expandOffset.offsetY,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "screenPushY"
+    )
+    val screenOffsetX by animateDpAsState(
+        targetValue = -expandOffset.offsetX,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "screenPushX"
+    )
+
+    Scaffold(
+        floatingActionButton = {
+            AnimatedContent(
+                targetState = selected,
+                transitionSpec = { fadeIn() togetherWith fadeOut() },
+                label = "fab_switch"
+            ) { variant ->
+                when (variant) {
+                    FabVariant.RADIAL_CLASSIC -> RadialClassicFab()
+                    FabVariant.RADIAL_FULL_ARC -> RadialFullArcFab()
+                    FabVariant.STACK_VERTICAL -> StackVerticalFab()
+                    FabVariant.STACK_MIXED -> StackMixedFab()
+                    FabVariant.STACK_HORIZONTAL -> StackHorizontalFab()
+                    FabVariant.STACK_PUSH -> StackPushFab(onExpandChange = { expandOffset = it })
+                    FabVariant.MORPH_GRID -> MorphGridFab()
+                    FabVariant.MORPH_DETAIL -> MorphDetailedFab()
+                }
             }
         }
-
-        FlowRow(
-            maxItemsInEachRow = 4,
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-                .background(Color.White)
-                .navigationBarsPadding()
-                .padding(horizontal = 12.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally)
+    ) { paddingValues ->
+        Column(modifier = Modifier
+            .padding(paddingValues)
+            .fillMaxSize()
+            .offset(y = screenOffsetY, x = screenOffsetX)
         ) {
-            FabVariant.entries.forEach { variant ->
-                FilterChip(
-                    selected = selected == variant,
-                    onClick = { selected = variant },
-                    label = {
-                        Text(
-                            text = variant.label,
-                            fontSize = 11.sp,
-                            fontWeight = if (selected == variant) FontWeight.Bold else FontWeight.Normal
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                items((1..13).toList()) { i ->
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(if (i == 0) 72.dp else 56.dp)
+                            .background(
+                                color = if (i % 3 == 0) Color(0xFFF0F0F0)
+                                else if (i % 3 == 1) Color(0xFFE8E8E8)
+                                else Color(0xFFDDDDDD),
+                                shape = RoundedCornerShape(16.dp)
+                            )
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(horizontal = 16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .background(Color(0xFFCCCCCC), CircleShape)
+                            )
+                            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                                Box(
+                                    modifier = Modifier
+                                        .width(120.dp)
+                                        .height(10.dp)
+                                        .background(Color(0xFFBBBBBB), RoundedCornerShape(4.dp))
+                                )
+                                Box(
+                                    modifier = Modifier
+                                        .width(80.dp)
+                                        .height(8.dp)
+                                        .background(Color(0xFFCCCCCC), RoundedCornerShape(4.dp))
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            FlowRow(
+                maxItemsInEachRow = 4,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.White)
+                    .navigationBarsPadding()
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally)
+            ) {
+                FabVariant.entries.forEach { variant ->
+                    FilterChip(
+                        selected = selected == variant,
+                        onClick = { selected = variant },
+                        label = {
+                            Text(
+                                text = variant.label,
+                                fontSize = 11.sp,
+                                fontWeight = if (selected == variant) FontWeight.Bold else FontWeight.Normal
+                            )
+                        },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = Orange,
+                            selectedLabelColor = Color.White
                         )
-                    },
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = Orange,
-                        selectedLabelColor = Color.White
                     )
-                )
+                }
             }
         }
     }
@@ -231,37 +316,6 @@ private fun StackHorizontalFab() {
                 exitTransition = FabItemTransition.Slide() + FabItemTransition.Fade(),
                 buttonEnterTransition = FabButtonTransition.Rotate(180f) + FabButtonTransition.Scale(0.7f),
                 buttonExitTransition = FabButtonTransition.Rotate(0f) + FabButtonTransition.Scale(1f)
-            )
-        )
-    )
-}
-
-@Composable
-private fun RadialExplosionFab() {
-    var expanded by remember { mutableStateOf(false) }
-
-    RadialFloatingActionButton(
-        expanded = expanded,
-        onClick = { expanded = !expanded },
-        items = (1..6).map { i ->
-            FabItem(
-                icon = Icons.Outlined.Notifications,
-                buttonStyle = FabItem.ButtonStyle(
-                    color = listOf(Orange, Teal, Green, Purple, Pink, Gold)[i - 1],
-                    size = 48.dp
-                ),
-                onClick = { expanded = false }
-            )
-        },
-        config = FabMainConfig(
-            buttonStyle = FabMainConfig.ButtonStyle(color = Color.Black, size = 60.dp),
-            itemArrangement = FabMainConfig.ItemArrangement(
-                radial = Orientation.Radial(arc = Orientation.Radial.Arc.END, radius = 140.dp)
-            ),
-            animation = FabMainConfig.Animation(
-                enterTransition = FabItemTransition.Scale(0) + FabItemTransition.Rotate(720f) + FabItemTransition.Fade(),
-                exitTransition = FabItemTransition.Scale(0) + FabItemTransition.Rotate(-720f) + FabItemTransition.Fade(),
-                buttonEnterTransition = FabButtonTransition.Scale(1.1f) + FabButtonTransition.Rotate(225f)
             )
         )
     )
@@ -485,6 +539,100 @@ private fun StackMixedFab() {
                 exitOrder = FabMainConfig.StaggerOrder.FILO,
                 buttonEnterTransition = FabButtonTransition.Rotate(90f) + FabButtonTransition.Scale(0.8f),
                 buttonExitTransition  = FabButtonTransition.Rotate(0f) + FabButtonTransition.Scale(1f)
+            )
+        )
+    )
+}
+
+@Composable
+private fun StackPushFab(onExpandChange: (StackExpandOffset) -> Unit) {
+    var expanded by remember { mutableStateOf(false) }
+
+    StackFloatingActionButton(
+        expanded = expanded,
+        onClick = { expanded = !expanded },
+        onExpandChange = onExpandChange,
+        items = listOf(
+            StackFabItem(direction = StackDirection.TOP) {
+                Box(
+                    modifier = Modifier
+                        .size(56.dp)
+                        .background(Purple, RoundedCornerShape(16.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("↑1", color = Color.White, fontWeight = FontWeight.Bold)
+                }
+            },
+            StackFabItem(direction = StackDirection.TOP) {
+                Box(
+                    modifier = Modifier
+                        .size(56.dp)
+                        .background(Purple, RoundedCornerShape(16.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("↑2", color = Color.White, fontWeight = FontWeight.Bold)
+                }
+            },
+            StackFabItem(direction = StackDirection.TOP) {
+                Box(
+                    modifier = Modifier
+                        .size(56.dp)
+                        .background(Purple, RoundedCornerShape(16.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("↑3", color = Color.White, fontWeight = FontWeight.Bold)
+                }
+            },
+            StackFabItem(direction = StackDirection.START) {
+                var text by remember { mutableStateOf("") }
+
+                Box(
+                    modifier = Modifier.width(330.dp)
+                ) {
+                    TextField(
+                        value = text,
+                        onValueChange = { text = it },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(min = 56.dp),
+                        placeholder = {
+                            Text(text = "Hinted search text", color = Color.Gray)
+                        },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.Search,
+                                contentDescription = null,
+                                tint = Color.Black
+                            )
+                        },
+                        shape = RoundedCornerShape(28.dp),
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color(0xFFF3F3F9),
+                            unfocusedContainerColor = Color(0xFFF3F3F9),
+                            disabledContainerColor = Color(0xFFF3F3F9),
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent
+                        ),
+                        singleLine = true
+                    )
+                }
+            }
+        ),
+        config = FabMainConfig(
+            buttonStyle = FabMainConfig.ButtonStyle(
+                color = Orange,
+                size = 64.dp
+            ),
+            itemArrangement = FabMainConfig.ItemArrangement(
+                stack = Orientation.Stack(spacedBy = 14.dp)
+            ),
+            animation = FabMainConfig.Animation(
+                enterTransition = FabItemTransition.Spring() + FabItemTransition.Scale() + FabItemTransition.Fade(),
+                exitTransition  = FabItemTransition.Slide() + FabItemTransition.Fade(),
+                enterOrder = FabMainConfig.StaggerOrder.FIFO,
+                exitOrder  = FabMainConfig.StaggerOrder.FILO,
+                buttonEnterTransition = FabButtonTransition.Rotate(45f) + FabButtonTransition.Scale(0.9f),
+                buttonExitTransition  = FabButtonTransition.Rotate(0f)  + FabButtonTransition.Scale(1f)
             )
         )
     )

@@ -49,7 +49,8 @@ data class FabMainConfig(
         }
 
         data class Stack(
-            val spacedBy: Dp = 40.dp
+            val spacedBy: Dp = 40.dp,
+            val spacingPadding: Dp = 24.dp
         ) : Orientation
 
         /**
