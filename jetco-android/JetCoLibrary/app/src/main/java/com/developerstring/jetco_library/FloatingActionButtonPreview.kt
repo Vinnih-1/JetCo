@@ -4,22 +4,24 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -30,7 +32,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.AccountBox
 import androidx.compose.material.icons.outlined.Delete
@@ -56,6 +57,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -72,6 +74,8 @@ import com.developerstring.jetco.ui.components.button.fab.model.StackExpandOffse
 import com.developerstring.jetco.ui.components.button.fab.model.StackFabItem
 import com.developerstring.jetco.ui.components.button.fab.transition.FabButtonTransition
 import com.developerstring.jetco.ui.components.button.fab.transition.FabItemTransition
+import com.developerstring.jetco.ui.components.button.fab.transition.OffsetTransition
+import com.developerstring.jetco.ui.components.button.fab.transition.ScaleTransition
 
 private val Orange  = Color(0xFFE46212)
 private val Teal    = Color(0xFF3DBFE2)
@@ -96,7 +100,7 @@ private enum class FabVariant(val label: String) {
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun FloatingActionButtonPreview() {
-    var selected by remember { mutableStateOf(FabVariant.STACK_PUSH) }
+    var selected by remember { mutableStateOf(FabVariant.RADIAL_FULL_ARC) }
     var expandOffset by remember { mutableStateOf(StackExpandOffset()) }
 
     val screenOffsetY by animateDpAsState(
@@ -224,6 +228,13 @@ fun FloatingActionButtonPreview() {
 @Composable
 private fun MorphDetailedFab() {
     var expanded by remember { mutableStateOf(false) }
+    val interactionSource = remember { MutableInteractionSource() }
+    val configuration = LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp.dp
+    val buttonSize = 68.dp
+    val padding = 16.dp
+
+    val targetX = (screenWidth / 2) - (buttonSize / 2) - padding
 
     MorphFloatingActionButton(
         expanded = expanded,
@@ -237,64 +248,101 @@ private fun MorphDetailedFab() {
                     width = 260.dp,
                     cardShape = RoundedCornerShape(28.dp)
                 )
+            ),
+            animation = FabMainConfig.Animation(
+                itemEnterDelay = 450L,
+                buttonEnterTransition = FabButtonTransition(
+                    offset = OffsetTransition(
+                        offsetX = -targetX,
+                        offsetY = 0.dp,
+                        spec = tween(durationMillis = 300)
+                    ),
+                    then = FabButtonTransition.SlideTo(
+                        x = -targetX,
+                        y = (-80).dp
+                    ) + FabButtonTransition.ColorTo(Purple.copy(alpha = .4f))
+                ),
+                buttonExitTransition = FabButtonTransition.Rotate(
+                    0f,
+                    then = FabButtonTransition.Scale(
+                        1f,
+                        then = FabButtonTransition.SlideTo()
+                    ) + FabButtonTransition(
+                        offset = OffsetTransition(
+                            offsetX = -targetX,
+                            offsetY = 0.dp,
+                            spec = tween(durationMillis = 300)
+                        )
+                    ) + FabButtonTransition.ColorTo(Purple)
+                )
             )
         ),
         card = {
             Column(
-                modifier = Modifier.padding(20.dp),
+                modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Box(
+                Column(
                     modifier = Modifier
-                        .size(64.dp)
-                        .background(
-                            Purple.copy(alpha = 0.1f), RoundedCornerShape(16.dp)
-                        ).clickable(onClick = { expanded = !expanded }),
-                    contentAlignment = Alignment.Center
+                        .width(IntrinsicSize.Min)
+                        .background(Purple.copy(alpha = 0.4f), RoundedCornerShape(16.dp))
+                        .padding(horizontal = 48.dp, vertical = 32.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Icon(
-                        Icons.Outlined.AccountBox,
-                        null,
-                        modifier = Modifier.size(32.dp),
-                        tint = Purple
+                    Box(
+                        modifier = Modifier
+                            .size(64.dp)
+                            .background(
+                                Purple.copy(alpha = 0.1f), RoundedCornerShape(16.dp)
+                            ).clickable(
+                                interactionSource = interactionSource,
+                                indication = null,
+                                onClick = { expanded = !expanded }
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            Icons.Outlined.AccountBox,
+                            null,
+                            modifier = Modifier.size(32.dp),
+                            tint = Purple
+                        )
+                    }
+                    Text(
+                        "User Profile",
+                        Modifier.padding(top = 12.dp),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp
                     )
-                }
-                Text(
-                    "User Profile",
-                    Modifier.padding(top = 12.dp),
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp
-                )
-                Text(
-                    "System Administrator",
-                    color = Color.Gray,
-                    fontSize = 12.sp
-                )
+                    Text(
+                        "System Administrator",
+                        color = Color.Gray,
+                        fontSize = 12.sp
+                    )
 
-                Row(
-                    Modifier
-                        .padding(top = 20.dp)
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    listOf(Icons.Outlined.Edit, Icons.Outlined.Share, Icons.Outlined.Delete).forEach { icon ->
-                        Box(
-                            Modifier.size(44.dp)
-                                .background(Color(0xFFF0F0F0), RoundedCornerShape(10.dp)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                icon,
-                                null,
-                                tint = Color.DarkGray,
-                                modifier = Modifier.size(20.dp)
-                            )
+                    Row(
+                        Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally)
+                    ) {
+                        listOf(Icons.Outlined.Edit, Icons.Outlined.Share, Icons.Outlined.Delete).forEach { icon ->
+                            Box(
+                                Modifier.size(44.dp)
+                                    .background(Color(0xFFF0F0F0), RoundedCornerShape(10.dp)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    icon,
+                                    null,
+                                    tint = Color.DarkGray,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
                         }
                     }
                 }
             }
         },
-        modifier = Modifier.offset(x = if (expanded) 20.dp else 0.dp)
+        modifier = Modifier.offset(x = if (expanded) 16.dp else 0.dp)
     )
 }
 
@@ -305,7 +353,7 @@ private fun StackHorizontalFab() {
     StackFloatingActionButton(
         expanded = expanded,
         onClick = { expanded = !expanded },
-        items = listOf(
+        items = listOf<FabItem>(
             FabItem(icon = Icons.Outlined.Share, onClick = { expanded = false }),
             FabItem(icon = Icons.Outlined.Favorite, onClick = { expanded = false }),
             FabItem(icon = Icons.Outlined.Email, onClick = { expanded = false })
@@ -314,10 +362,25 @@ private fun StackHorizontalFab() {
             buttonStyle = FabMainConfig.ButtonStyle(color = Navy, size = 64.dp),
             itemArrangement = FabMainConfig.ItemArrangement(stack = Orientation.Stack(spacedBy = 12.dp)),
             animation = FabMainConfig.Animation(
-                enterTransition = FabItemTransition.Slide() + FabItemTransition.Fade(),
-                exitTransition = FabItemTransition.Slide() + FabItemTransition.Fade(),
-                buttonEnterTransition = FabButtonTransition.Rotate(180f) + FabButtonTransition.Scale(0.7f),
-                buttonExitTransition = FabButtonTransition.Rotate(0f) + FabButtonTransition.Scale(1f)
+                itemEnterDelay = 300L,
+                itemEnterTransition = FabItemTransition.Slide() + FabItemTransition.Fade(),
+                itemExitTransition = FabItemTransition.Slide(
+                    dampingRatio = Spring.DampingRatioNoBouncy
+                ) + FabItemTransition.Fade(100),
+                buttonEnterTransition = FabButtonTransition.Scale(
+                    scale = 1.1f,
+                    stiffness = Spring.StiffnessHigh,
+                    dampingRatio = Spring.DampingRatioHighBouncy,
+                    then = FabButtonTransition.Scale(
+                        scale = 0.9f,
+                    ) + FabButtonTransition.Rotate(45f) + FabButtonTransition.SlideTo(y = (-48).dp)
+                ),
+                buttonExitTransition = FabButtonTransition.Scale(
+                    1f,
+                    stiffness = Spring.StiffnessHigh,
+                    dampingRatio = Spring.DampingRatioHighBouncy,
+                    then = FabButtonTransition.SlideTo(y = 0.dp) + FabButtonTransition.Rotate(0f)
+                )
             )
         )
     )
@@ -326,7 +389,7 @@ private fun StackHorizontalFab() {
 @Composable
 private fun RadialClassicFab() {
     var expanded by remember { mutableStateOf(false) }
-
+    
     RadialFloatingActionButton(
         expanded = expanded,
         onClick = { expanded = !expanded },
@@ -357,14 +420,16 @@ private fun RadialClassicFab() {
             itemArrangement = FabMainConfig.ItemArrangement(
                 radial = Orientation.Radial(
                     arc = Orientation.Radial.Arc.END,
-                    radius = 100.dp
+                    radius = 150.dp
                 )
             ),
             animation = FabMainConfig.Animation(
-                enterTransition = FabItemTransition.Spring() + FabItemTransition.Fade(),
-                exitTransition  = FabItemTransition.Slide() + FabItemTransition.Fade(),
-                enterOrder = FabMainConfig.StaggerOrder.FIFO,
-                exitOrder  = FabMainConfig.StaggerOrder.FILO,
+                itemEnterTransition = FabItemTransition.Slide() + FabItemTransition.Fade(),
+                itemExitTransition  = FabItemTransition.Slide(
+                    dampingRatio = Spring.DampingRatioNoBouncy
+                ) + FabItemTransition.Fade(),
+                itemEnterOrder = FabMainConfig.StaggerOrder.FIFO,
+                itemExitOrder  = FabMainConfig.StaggerOrder.FILO,
                 buttonEnterTransition = FabButtonTransition.Rotate(45f) + FabButtonTransition.Scale(0.85f),
                 buttonExitTransition  = FabButtonTransition.Rotate(0f) + FabButtonTransition.Scale(1f)
             )
@@ -375,6 +440,12 @@ private fun RadialClassicFab() {
 @Composable
 private fun RadialFullArcFab() {
     var expanded by remember { mutableStateOf(false) }
+    val configuration = LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp.dp
+    val buttonSize = 68.dp
+    val padding = 16.dp
+
+    val targetX = (screenWidth / 2) - (buttonSize / 2) - padding
 
     RadialFloatingActionButton(
         expanded = expanded,
@@ -409,7 +480,7 @@ private fun RadialFullArcFab() {
         config = FabMainConfig(
             buttonStyle = FabMainConfig.ButtonStyle(
                 color = Navy,
-                size = 68.dp,
+                size = buttonSize,
                 shape = RoundedCornerShape(20.dp)
             ),
             itemArrangement = FabMainConfig.ItemArrangement(
@@ -419,12 +490,22 @@ private fun RadialFullArcFab() {
                 )
             ),
             animation = FabMainConfig.Animation(
-                enterTransition = FabItemTransition.Scale() + FabItemTransition.Fade() + FabItemTransition.Rotate(-360f),
-                exitTransition  = FabItemTransition.Scale() + FabItemTransition.Fade() + FabItemTransition.Rotate(0f),
-                enterOrder = FabMainConfig.StaggerOrder.ALL,
-                exitOrder  = FabMainConfig.StaggerOrder.ALL,
-                buttonEnterTransition = FabButtonTransition.Rotate(135f) + FabButtonTransition.Scale(0.9f) + FabButtonTransition.SlideTo(y = (-8).dp),
-                buttonExitTransition  = FabButtonTransition.Rotate(0f) + FabButtonTransition.Scale(1f) + FabButtonTransition.SlideTo(y = 0.dp)
+                itemEnterDelay = 1000L,
+                itemEnterTransition = FabItemTransition.Scale() + FabItemTransition.Fade() + FabItemTransition.Rotate(-360f),
+                itemExitTransition  = FabItemTransition.Scale() + FabItemTransition.Fade() + FabItemTransition.Rotate(0f),
+                itemEnterOrder = FabMainConfig.StaggerOrder.ALL,
+                itemExitOrder  = FabMainConfig.StaggerOrder.ALL,
+                buttonEnterTransition = FabButtonTransition.SlideTo(
+                    x = -targetX,
+                    then = FabButtonTransition.Rotate(135f)
+                            + FabButtonTransition.Scale(0.9f) + FabButtonTransition.SlideTo(x = -targetX, y = (-8).dp)
+                            + FabButtonTransition.ColorTo(Color.Gray)
+                ),
+                buttonExitTransition  = FabButtonTransition.SlideTo(
+                    y = 0.dp,
+                    x = -targetX,
+                    then = FabButtonTransition.SlideTo() + FabButtonTransition.Rotate(0f) + FabButtonTransition.Scale(1f)
+                ) + FabButtonTransition.ColorTo(Navy)
             )
         )
     )
@@ -465,10 +546,12 @@ private fun StackVerticalFab() {
                 stack = Orientation.Stack(spacedBy = 16.dp)
             ),
             animation = FabMainConfig.Animation(
-                enterTransition = FabItemTransition.SlideAndFade() + FabItemTransition.Scale(),
-                exitTransition = FabItemTransition.Slide() + FabItemTransition.Fade(),
-                enterOrder = FabMainConfig.StaggerOrder.FIFO,
-                exitOrder = FabMainConfig.StaggerOrder.FILO,
+                itemEnterTransition = FabItemTransition.SlideAndFade() + FabItemTransition.Scale(),
+                itemExitTransition = FabItemTransition.Slide(
+                    dampingRatio = Spring.DampingRatioNoBouncy
+                ) + FabItemTransition.Fade(),
+                itemEnterOrder = FabMainConfig.StaggerOrder.FIFO,
+                itemExitOrder = FabMainConfig.StaggerOrder.FILO,
                 buttonEnterTransition = FabButtonTransition.Rotate(45f),
                 buttonExitTransition = FabButtonTransition.Rotate(0f)
             )
@@ -535,10 +618,12 @@ private fun StackMixedFab() {
                 stack = Orientation.Stack(spacedBy = 14.dp)
             ),
             animation = FabMainConfig.Animation(
-                enterTransition = FabItemTransition.Spring() + FabItemTransition.Scale() + FabItemTransition.Fade(),
-                exitTransition  = FabItemTransition.Slide() + FabItemTransition.Fade(),
-                enterOrder = FabMainConfig.StaggerOrder.FIFO,
-                exitOrder = FabMainConfig.StaggerOrder.FILO,
+                itemEnterTransition = FabItemTransition.Slide() + FabItemTransition.Scale() + FabItemTransition.Fade(),
+                itemExitTransition  = FabItemTransition.Slide(
+                    dampingRatio = Spring.DampingRatioNoBouncy
+                ) + FabItemTransition.Fade(),
+                itemEnterOrder = FabMainConfig.StaggerOrder.FIFO,
+                itemExitOrder = FabMainConfig.StaggerOrder.FILO,
                 buttonEnterTransition = FabButtonTransition.Rotate(90f) + FabButtonTransition.Scale(0.8f),
                 buttonExitTransition  = FabButtonTransition.Rotate(0f) + FabButtonTransition.Scale(1f)
             )
@@ -635,12 +720,19 @@ private fun StackPushFab(onExpandChange: (StackExpandOffset) -> Unit) {
                 stack = Orientation.Stack(spacedBy = 14.dp)
             ),
             animation = FabMainConfig.Animation(
-                enterTransition = FabItemTransition.Spring() + FabItemTransition.Scale() + FabItemTransition.Fade(),
-                exitTransition  = FabItemTransition.Slide() + FabItemTransition.Fade(),
-                enterOrder = FabMainConfig.StaggerOrder.FIFO,
-                exitOrder  = FabMainConfig.StaggerOrder.FILO,
-                buttonEnterTransition = FabButtonTransition.Rotate(45f) + FabButtonTransition.Scale(0.9f),
-                buttonExitTransition  = FabButtonTransition.Rotate(0f)  + FabButtonTransition.Scale(1f)
+                itemEnterDelay = 300L,
+                itemEnterTransition = FabItemTransition.Slide() + FabItemTransition.Scale() + FabItemTransition.Fade(),
+                itemExitTransition  = FabItemTransition.Slide() + FabItemTransition.Fade() + FabItemTransition.Scale(),
+                itemEnterOrder = FabMainConfig.StaggerOrder.FIFO,
+                itemExitOrder  = FabMainConfig.StaggerOrder.FILO,
+                buttonEnterTransition = FabButtonTransition.Rotate(45f) + FabButtonTransition.Scale(
+                    0.9f,
+                    then = FabButtonTransition.SlideTo(y = (-8).dp)
+                ),
+                buttonExitTransition  = FabButtonTransition.Rotate(0f)  + FabButtonTransition.Scale(
+                    1f,
+                    then = FabButtonTransition.SlideTo(y = 0.dp)
+                )
             )
         )
     )
@@ -649,6 +741,9 @@ private fun StackPushFab(onExpandChange: (StackExpandOffset) -> Unit) {
 @Composable
 private fun MorphGridFab() {
     var expanded by remember { mutableStateOf(false) }
+    val cardWidth = 240.dp
+    val buttonSize = 72.dp
+    val targetX = (cardWidth / 2) - (buttonSize / 2)
 
     MorphFloatingActionButton(
         expanded = expanded,
@@ -714,8 +809,22 @@ private fun MorphGridFab() {
                 )
             ),
             animation = FabMainConfig.Animation(
-                enterTransition = FabItemTransition.Scale() + FabItemTransition.Fade(),
-                enterOrder = FabMainConfig.StaggerOrder.FIFO
+                itemEnterTransition = FabItemTransition.Scale() + FabItemTransition.Fade(),
+                itemExitTransition  = FabItemTransition.Scale() + FabItemTransition.Fade(),
+                itemEnterOrder = FabMainConfig.StaggerOrder.FIFO,
+                itemEnterDelay = 300L,
+                buttonEnterTransition = FabButtonTransition.SlideTo(
+                    x = -targetX,
+                    y = (-80).dp,
+                    then = FabButtonTransition(scale = ScaleTransition(3f, tween()))
+                ),
+                buttonExitTransition = FabButtonTransition.Rotate(
+                    0f,
+                    then = FabButtonTransition.Scale(
+                        1f,
+                        then = FabButtonTransition.SlideTo()
+                    )
+                )
             )
         )
     )

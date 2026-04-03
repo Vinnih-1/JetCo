@@ -85,21 +85,27 @@ data class FabMainConfig(
     /**
      * Animation configuration for the FAB family.
      *
-     * @property enterOrder The order in which items appear (FIFO, FILO, ALL).
-     * @property exitOrder The order in which items disappear.
-     * @property enterTransition Combined transitions for sub-item entry.
-     * @property exitTransition Combined transitions for sub-item exit.
+     * @property itemEnterOrder The order in which items appear (FIFO, FILO, ALL).
+     * @property itemExitOrder The order in which items disappear.
+     * @property itemEnterTransition Combined transitions for sub-item entry.
+     * @property itemExitTransition Combined transitions for sub-item exit.
      * @property buttonEnterTransition Transitions applied to the main FAB on expansion.
      * @property buttonExitTransition Transitions applied to the main FAB on collapse.
+     * @property itemEnterDelay Additional delay in milliseconds before items start their
+     * enter animation. Use this to sequence items after the main FAB button animation —
+     * for example, if you use a spring with high bounce on the button, set this to roughly
+     * match the visual duration of that spring so items only appear once the button
+     * looks settled. `0L` means items start immediately when expanded becomes true.
      */
     @Stable
     open class Animation(
-        val enterOrder: StaggerOrder = StaggerOrder.FIFO,
-        val exitOrder: StaggerOrder = StaggerOrder.FILO,
-        val enterTransition: FabItemTransition = FabItemTransition.Spring() + FabItemTransition.Fade(),
-        val exitTransition: FabItemTransition = FabItemTransition.Slide() + FabItemTransition.Fade(),
+        val itemEnterOrder: StaggerOrder = StaggerOrder.FIFO,
+        val itemExitOrder: StaggerOrder = StaggerOrder.FILO,
+        val itemEnterTransition: FabItemTransition = FabItemTransition.Slide() + FabItemTransition.Fade(),
+        val itemExitTransition: FabItemTransition = FabItemTransition.Slide() + FabItemTransition.Fade(),
         val buttonEnterTransition: FabButtonTransition = FabButtonTransition.Rotate(45f),
-        val buttonExitTransition: FabButtonTransition = FabButtonTransition.Rotate(0f)
+        val buttonExitTransition: FabButtonTransition = FabButtonTransition.Rotate(0f),
+        val itemEnterDelay: Long = 300L,
     )
 
     /**

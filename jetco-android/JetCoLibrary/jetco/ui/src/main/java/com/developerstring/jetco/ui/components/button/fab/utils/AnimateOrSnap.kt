@@ -1,4 +1,4 @@
-package com.developerstring.jetco.ui.components.button.fab
+package com.developerstring.jetco.ui.components.button.fab.utils
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationSpec

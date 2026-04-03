@@ -1,18 +1,21 @@
 package com.developerstring.jetco.ui.components.button.fab
 
+import androidx.compose.animation.VectorConverter
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.VectorConverter
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.offset
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
@@ -25,7 +28,11 @@ import com.developerstring.jetco.ui.components.button.fab.model.FabMainConfig
 import com.developerstring.jetco.ui.components.button.fab.model.StackDirection
 import com.developerstring.jetco.ui.components.button.fab.model.StackExpandOffset
 import com.developerstring.jetco.ui.components.button.fab.model.StackFabItem
-import kotlinx.coroutines.coroutineScope
+import com.developerstring.jetco.ui.components.button.fab.utils.LocalFabButtonColor
+import com.developerstring.jetco.ui.components.button.fab.utils.animateFabButton
+import com.developerstring.jetco.ui.components.button.fab.utils.animateFabItem
+import com.developerstring.jetco.ui.components.button.fab.utils.fabItemStaggerDelay
+import com.developerstring.jetco.ui.components.button.fab.utils.resolvedFinalOffset
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -42,8 +49,7 @@ import kotlinx.coroutines.launch
  * @param modifier Modifier applied to the root container.
  * @param onClick Callback triggered when the main FAB button is clicked.
  * @param config Configuration for styling and animations. See [FabMainConfig].
- * @param onExpandChange Callback that provides [StackExpandOffset]
- * containing the total width/height of expanded main FAB + [FabMainConfig.Orientation.Stack.spacingPadding].
+ * @param onExpandChange Callback that provides [StackExpandOffset].
  * @param content Optional custom composable for the main FAB button.
  *
  * @see StackExpandOffset for handling screen content displacement.
@@ -154,6 +160,9 @@ internal fun StackFloatingActionButtonBase(
     ) {
         val fabOffsetX = remember { Animatable(0.dp, Dp.VectorConverter) }
         val fabOffsetY = remember { Animatable(0.dp, Dp.VectorConverter) }
+        val fabScale = remember { Animatable(1f) }
+        val fabRotation = remember { Animatable(0f) }
+        val fabColor = remember { Animatable(config.buttonStyle.color, Color.VectorConverter(config.buttonStyle.color.colorSpace)) }
 
         items.forEachIndexed { index, stackItem ->
             val direction = stackItem.direction
@@ -202,61 +211,30 @@ internal fun StackFloatingActionButtonBase(
             val groupSize = groupIndices.size
 
             LaunchedEffect(expanded, targetOffsetX, targetOffsetY) {
-                val stepMs = 300 / groupSize.coerceAtLeast(1)
-                val order = if (expanded) config.animation.enterOrder else config.animation.exitOrder
-                val transition = if (expanded) config.animation.enterTransition else config.animation.exitTransition
-                val staggerDelay = order.delayFor(
+                val transition = if (expanded) config.animation.itemEnterTransition
+                else config.animation.itemExitTransition
+
+                val staggerDelay = fabItemStaggerDelay(
+                    expanded = expanded,
                     index = positionInGroup,
                     total = (groupSize - 1).coerceAtLeast(0),
-                    stepMs = stepMs
+                    totalCount = groupSize.coerceAtLeast(1),
+                    config = config
                 )
+                val enterDelay = if (expanded) config.animation.itemEnterDelay else 0L
+                delay(enterDelay + staggerDelay)
 
-                delay(staggerDelay)
-
-                coroutineScope {
-                    launch {
-                        offsetX.animateOrSnap(
-                            targetValue = if (expanded) targetOffsetX else 0.dp,
-                            spec = transition.offsetSpec,
-                            predicate = { expanded }
-                        )
-                    }
-                    launch {
-                        offsetY.animateOrSnap(
-                            targetValue = if (expanded) targetOffsetY else 0.dp,
-                            spec = transition.offsetSpec,
-                            predicate = { expanded }
-                        )
-                    }
-                    launch {
-                        alpha.animateOrSnap(
-                            targetValue = if (expanded) 1f else 0f,
-                            spec = transition.alphaSpec,
-                            predicate = { expanded }
-                        )
-                    }
-                    launch {
-                        scale.animateOrSnap(
-                            targetValue = if (expanded) 1f else 0f,
-                            spec = transition.scaleSpec,
-                            predicate = { expanded }
-                        )
-                    }
-                    launch {
-                        rotation.animateOrSnap(
-                            targetValue = transition.rotate?.target,
-                            spec = transition.rotate?.spec,
-                            predicate = { expanded }
-                        )
-                    }
-                }
-
-                if (!expanded) { // Reset to initial position
-                    offsetX.snapTo(0.dp)
-                    offsetY.snapTo(0.dp)
-                    alpha.snapTo(0f)
-                    scale.snapTo(0f)
-                }
+                animateFabItem(
+                    expanded = expanded,
+                    transition = transition,
+                    alpha = alpha,
+                    scale = scale,
+                    rotation = rotation,
+                    offsetX = offsetX,
+                    offsetY = offsetY,
+                    targetOffsetX = targetOffsetX,
+                    targetOffsetY = targetOffsetY,
+                )
             }
 
             Box(
@@ -268,9 +246,9 @@ internal fun StackFloatingActionButtonBase(
                         if (itemWidths[index] != width) itemWidths[index] = width
                         if (itemHeights[index] != height) itemHeights[index] = height
                     }.graphicsLayer {
-                        this.alpha = alpha.value
-                        this.scaleX = scale.value
-                        this.scaleY = scale.value
+                        this.alpha    = alpha.value
+                        this.scaleX   = scale.value
+                        this.scaleY   = scale.value
                         this.rotationZ = rotation.value
                     }
             ) {
@@ -278,52 +256,47 @@ internal fun StackFloatingActionButtonBase(
             }
         }
 
-        val fabScale = remember { Animatable(1f) }
-        val fabRotation = remember { Animatable(0f) }
-
         LaunchedEffect(expanded) {
             val btnTransition = if (expanded) config.animation.buttonEnterTransition
             else config.animation.buttonExitTransition
 
             if (expanded) {
+                val (finalOffsetX, finalOffsetY) = btnTransition.resolvedFinalOffset()
                 onExpandChange(StackExpandOffset(
-                    offsetY = fabHeightDp + spacingPadding,
-                    offsetX = fabWidthDp + spacingPadding
+                    offsetY = fabHeightDp + spacingPadding - finalOffsetY,
+                    offsetX = fabWidthDp + spacingPadding - finalOffsetX
                 ))
             } else {
                 onExpandChange(StackExpandOffset())
             }
 
-            coroutineScope {
-                launch {
-                    fabOffsetX.animateOrSnap(btnTransition.offset?.offsetX, btnTransition.offset?.spec)
-                }
-                launch {
-                    fabOffsetY.animateOrSnap(btnTransition.offset?.offsetY, btnTransition.offset?.spec)
-                }
-                launch {
-                    fabScale.animateOrSnap(btnTransition.scale?.target, btnTransition.scale?.spec)
-                }
-                launch {
-                    fabRotation.animateOrSnap(btnTransition.rotation?.target, btnTransition.rotation?.spec)
-                }
+            launch {
+                animateFabButton(
+                    btnTransition = btnTransition,
+                    fabOffsetX = fabOffsetX,
+                    fabOffsetY = fabOffsetY,
+                    fabScale = fabScale,
+                    fabRotation = fabRotation,
+                    fabColor = fabColor,
+                )
             }
         }
 
-        // Main FAB
-        Box(
-            modifier = Modifier
-                .offset(x = fabOffsetX.value, y = fabOffsetY.value)
-                .graphicsLayer {
-                    scaleX = fabScale.value
-                    scaleY = fabScale.value
-                    rotationZ = fabRotation.value
-                }.onSizeChanged { size ->
-                    fabWidthDp = with(density) { size.width.toDp() }
-                    fabHeightDp = with(density) { size.height.toDp() }
-                }
-        ) {
-            content()
+        CompositionLocalProvider(LocalFabButtonColor provides fabColor.value) {
+            Box(
+                modifier = Modifier
+                    .offset(x = fabOffsetX.value, y = fabOffsetY.value)
+                    .graphicsLayer {
+                        scaleX     = fabScale.value
+                        scaleY     = fabScale.value
+                        rotationZ  = fabRotation.value
+                    }.onSizeChanged { size ->
+                        fabWidthDp  = with(density) { size.width.toDp() }
+                        fabHeightDp = with(density) { size.height.toDp() }
+                    }
+            ) {
+                content()
+            }
         }
     }
 }

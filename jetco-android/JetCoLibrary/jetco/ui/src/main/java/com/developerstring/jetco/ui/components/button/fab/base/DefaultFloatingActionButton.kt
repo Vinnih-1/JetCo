@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import com.developerstring.jetco.ui.components.button.fab.utils.LocalFabButtonColor
 import com.developerstring.jetco.ui.components.button.fab.model.FabMainConfig
 
 @Composable
@@ -25,21 +26,22 @@ internal fun DefaultFloatingActionButton(
     onClick: (() -> Unit) = {},
     config: FabMainConfig = FabMainConfig()
 ) {
+    val animatedColor = LocalFabButtonColor.current
+    val resolvedColor = if (animatedColor == Color.Unspecified) config.buttonStyle.color else animatedColor
+
     Box(
         modifier = modifier
             .defaultMinSize(minWidth = config.buttonStyle.size)
             .height(config.buttonStyle.size)
             .clip(config.buttonStyle.shape)
-            .background(config.buttonStyle.color)
+            .background(resolvedColor)
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = LocalIndication.current
             ) { onClick.invoke() },
         contentAlignment = Alignment.Center
     ) {
-        Box(
-            contentAlignment = Alignment.Center,
-        ) {
+        Box(contentAlignment = Alignment.Center) {
             Icon(
                 imageVector = Icons.Rounded.Add,
                 contentDescription = "Base FAB icon",

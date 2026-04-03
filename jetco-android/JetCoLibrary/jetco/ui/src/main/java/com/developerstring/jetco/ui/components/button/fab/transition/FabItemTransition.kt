@@ -17,7 +17,7 @@ import androidx.compose.ui.unit.Dp
  *
  * ## Example:
  * ```kotlin
- * val myItemTransition = FabItemTransition.Spring() + FabItemTransition.Fade()
+ * val myItemTransition = FabItemTransition.Slide() + FabItemTransition.Fade()
  * ```
  *
  * @property offsetSpec Animation for the item's movement (displacement).
@@ -39,18 +39,12 @@ class FabItemTransition(
     )
 
     companion object {
-        fun Spring(
-            dampingRatio: Float = Spring.DampingRatioMediumBouncy,
-            stiffness: Float = Spring.StiffnessMedium
-        ): FabItemTransition = FabItemTransition(
-            offsetSpec = spring(dampingRatio, stiffness)
-        )
 
         fun Slide(
-            durationMillis: Int = 300,
-            easing: Easing = FastOutSlowInEasing
+            stiffness: Float = Spring.StiffnessMedium,
+            dampingRatio: Float = Spring.DampingRatioMediumBouncy,
         ): FabItemTransition = FabItemTransition(
-            offsetSpec = tween(durationMillis, easing = easing)
+            offsetSpec = spring(dampingRatio = dampingRatio, stiffness = stiffness)
         )
 
         fun Fade(
@@ -62,27 +56,29 @@ class FabItemTransition(
 
         fun SlideAndFade(
             durationMillis: Int = 300,
-            easing: Easing = FastOutSlowInEasing
+            easing: Easing = FastOutSlowInEasing,
+            stiffness: Float = Spring.StiffnessMedium,
+            dampingRatio: Float = Spring.DampingRatioMediumBouncy,
         ): FabItemTransition = FabItemTransition(
-            offsetSpec = tween(durationMillis, easing = easing),
+            offsetSpec = spring(dampingRatio = dampingRatio, stiffness = stiffness),
             alphaSpec = tween(durationMillis, easing = easing),
         )
 
         fun Scale(
-            durationMillis: Int = 300,
-            easing: Easing = FastOutSlowInEasing
+            stiffness: Float = Spring.StiffnessMedium,
+            dampingRatio: Float = Spring.DampingRatioMediumBouncy,
         ): FabItemTransition = FabItemTransition(
-            scaleSpec = tween(durationMillis, easing = easing)
+            scaleSpec = spring(dampingRatio = dampingRatio, stiffness = stiffness)
         )
 
         fun Rotate(
             target: Float,
-            durationMillis: Int = 300,
-            easing: Easing = FastOutSlowInEasing
+            stiffness: Float = Spring.StiffnessMedium,
+            dampingRatio: Float = Spring.DampingRatioMediumBouncy,
         ): FabItemTransition = FabItemTransition(
             rotate = RotateTransition(
                 target = target,
-                spec = tween(durationMillis, easing = easing)
+                spec = spring(dampingRatio = dampingRatio, stiffness = stiffness)
             )
         )
     }

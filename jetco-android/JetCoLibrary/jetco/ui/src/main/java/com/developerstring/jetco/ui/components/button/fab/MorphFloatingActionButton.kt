@@ -1,20 +1,34 @@
 package com.developerstring.jetco.ui.components.button.fab
 
-import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.VectorConverter
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.VectorConverter
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import com.developerstring.jetco.ui.components.button.fab.base.DefaultFabItem
 import com.developerstring.jetco.ui.components.button.fab.base.DefaultFloatingActionButton
 import com.developerstring.jetco.ui.components.button.fab.base.DefaultMorphCard
@@ -22,7 +36,10 @@ import com.developerstring.jetco.ui.components.button.fab.model.FabItem
 import com.developerstring.jetco.ui.components.button.fab.model.FabMainConfig
 import com.developerstring.jetco.ui.components.button.fab.model.MorphFabItem
 import com.developerstring.jetco.ui.components.button.fab.scope.MorphCardScope
-import kotlinx.coroutines.coroutineScope
+import com.developerstring.jetco.ui.components.button.fab.utils.LocalFabButtonColor
+import com.developerstring.jetco.ui.components.button.fab.utils.animateFabButton
+import com.developerstring.jetco.ui.components.button.fab.utils.animateFabItem
+import com.developerstring.jetco.ui.components.button.fab.utils.fabItemStaggerDelay
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -59,7 +76,7 @@ fun MorphFloatingActionButton(
         DefaultMorphCard(config = config, onClose = onClick, scope = this)
     }
 ) {
-    val items = items.map { item ->
+    val mappedItems = items.map { item ->
         MorphFabItem {
             DefaultFabItem(item = item, onClick = { item.onClick() })
         }
@@ -67,7 +84,7 @@ fun MorphFloatingActionButton(
 
     MorphFloatingActionButtonBase(
         expanded = expanded,
-        items = items,
+        items = mappedItems,
         modifier = modifier,
         onClick = onClick,
         config = config,
@@ -132,6 +149,51 @@ internal fun MorphFloatingActionButtonBase(
     }
 ) {
     val morph = config.itemArrangement.morph
+    var cardVisible by remember { mutableStateOf(false) }
+
+    val fabOffsetX = remember { Animatable(0.dp, Dp.VectorConverter) }
+    val fabOffsetY = remember { Animatable(0.dp, Dp.VectorConverter) }
+    val fabScale = remember { Animatable(1f) }
+    val fabRotation = remember { Animatable(0f) }
+    val fabColor = remember { Animatable(config.buttonStyle.color, Color.VectorConverter(config.buttonStyle.color.colorSpace)) }
+
+    LaunchedEffect(expanded) {
+        val btnTransition = if (expanded) config.animation.buttonEnterTransition
+        else config.animation.buttonExitTransition
+
+        if (expanded) {
+            cardVisible = false
+
+            launch {
+                animateFabButton(
+                    btnTransition = btnTransition,
+                    fabOffsetX = fabOffsetX,
+                    fabOffsetY = fabOffsetY,
+                    fabScale = fabScale,
+                    fabRotation = fabRotation,
+                    fabColor = fabColor,
+                )
+            }
+
+            delay(config.animation.itemEnterDelay)
+
+            cardVisible = true
+        } else {
+            cardVisible = false
+
+            launch {
+                animateFabButton(
+                    btnTransition = btnTransition,
+                    fabOffsetX = fabOffsetX,
+                    fabOffsetY = fabOffsetY,
+                    fabScale = fabScale,
+                    fabRotation = fabRotation,
+                    fabColor = fabColor,
+                )
+            }
+        }
+    }
+
     val itemsContent: @Composable () -> Unit = {
         Spacer(modifier = Modifier.size(morph.headerSpace))
 
@@ -142,51 +204,30 @@ internal fun MorphFloatingActionButtonBase(
             modifier = Modifier.fillMaxWidth()
         ) {
             items.forEachIndexed { index, morphItem ->
-                // key = index ensures remember is stable per item slot
                 val alpha = remember(index) { Animatable(0f) }
                 val scale = remember(index) { Animatable(0f) }
-                val rotation = remember { Animatable(0f) }
+                val rotation = remember(index) { Animatable(0f) }
 
-                LaunchedEffect(index) {
-                    val transition = config.animation.enterTransition
-                    val stepMs = 300 / (items.size - 1).coerceAtLeast(1)
-                    val staggerDelay = config.animation.enterOrder.delayFor(
+                LaunchedEffect(cardVisible) {
+                    val transition = if (cardVisible) config.animation.itemEnterTransition
+                    else config.animation.itemExitTransition
+
+                    val staggerDelay = fabItemStaggerDelay(
+                        expanded = cardVisible,
                         index = index,
                         total = items.size - 1,
-                        stepMs = stepMs
+                        totalCount = (items.size - 1).coerceAtLeast(1),
+                        config = config
                     )
-
                     delay(staggerDelay)
 
-                    coroutineScope {
-                        launch {
-                            alpha.animateOrSnap(
-                                targetValue = if (expanded) 1f else 0f,
-                                spec = transition.alphaSpec,
-                                predicate = { expanded }
-                            )
-                        }
-                        launch {
-                            scale.animateOrSnap(
-                                targetValue = if (expanded) 1f else 0f,
-                                spec = transition.scaleSpec,
-                                predicate = { expanded }
-                            )
-                        }
-                        launch {
-                            rotation.animateOrSnap(
-                                targetValue = transition.rotate?.target,
-                                spec = transition.rotate?.spec,
-                                predicate = { expanded }
-                            )
-                        }
-                    }
-
-                    if (!expanded) { // Reset to initial position
-                        alpha.snapTo(0f)
-                        scale.snapTo(0f)
-                        rotation.snapTo(0f)
-                    }
+                    animateFabItem(
+                        expanded = cardVisible,
+                        transition = transition,
+                        alpha = alpha,
+                        scale = scale,
+                        rotation = rotation,
+                    )
                 }
 
                 Box(
@@ -202,19 +243,33 @@ internal fun MorphFloatingActionButtonBase(
             }
         }
     }
-    val scope = MorphCardScope(
-        itemsContent = itemsContent
-    )
 
-    AnimatedContent(
-        targetState = expanded,
-        label = "MorphFloatingActionButton",
-        modifier = modifier
-    ) {
-        if (it) {
-            scope.card()
-        } else {
-            Box {
+    val scope = MorphCardScope(itemsContent = itemsContent)
+
+    Box(modifier = modifier) {
+        AnimatedVisibility(
+            visible = cardVisible,
+            enter = fadeIn() + scaleIn(initialScale = 0.92f),
+            exit  = fadeOut() + scaleOut(targetScale = 0.82f),
+            modifier = Modifier.align(Alignment.BottomEnd)
+        ) {
+            CompositionLocalProvider(LocalFabButtonColor provides fabColor.value) {
+                scope.card()
+            }
+        }
+
+        CompositionLocalProvider(LocalFabButtonColor provides fabColor.value) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .offset(x = fabOffsetX.value, y = fabOffsetY.value)
+                    .graphicsLayer {
+                        scaleX = fabScale.value
+                        scaleY = fabScale.value
+                        rotationZ = fabRotation.value
+                        alpha = if (cardVisible) 0f else 1f
+                    }
+            ) {
                 content()
             }
         }
