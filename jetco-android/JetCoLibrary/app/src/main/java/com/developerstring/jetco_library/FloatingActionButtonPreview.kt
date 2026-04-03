@@ -260,7 +260,7 @@ private fun MorphDetailedFab() {
                     then = FabButtonTransition.SlideTo(
                         x = -targetX,
                         y = (-80).dp
-                    ) + FabButtonTransition.ColorTo(Purple.copy(alpha = .4f))
+                    ) + FabButtonTransition.ColorTo(Purple.copy(alpha = .4f)) + FabButtonTransition.Scale(scale = 2f)
                 ),
                 buttonExitTransition = FabButtonTransition.Rotate(
                     0f,
@@ -285,7 +285,7 @@ private fun MorphDetailedFab() {
                 Column(
                     modifier = Modifier
                         .width(IntrinsicSize.Min)
-                        .background(Purple.copy(alpha = 0.4f), RoundedCornerShape(16.dp))
+                        .background(Purple.copy(alpha = 0.8f), RoundedCornerShape(16.dp))
                         .padding(horizontal = 48.dp, vertical = 32.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
@@ -293,7 +293,7 @@ private fun MorphDetailedFab() {
                         modifier = Modifier
                             .size(64.dp)
                             .background(
-                                Purple.copy(alpha = 0.1f), RoundedCornerShape(16.dp)
+                                Color.White.copy(alpha = 0.6f), RoundedCornerShape(16.dp)
                             ).clickable(
                                 interactionSource = interactionSource,
                                 indication = null,
@@ -312,11 +312,12 @@ private fun MorphDetailedFab() {
                         "User Profile",
                         Modifier.padding(top = 12.dp),
                         fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp
+                        fontSize = 16.sp,
+                        color = Color.White
                     )
                     Text(
                         "System Administrator",
-                        color = Color.Gray,
+                        color = Color.White,
                         fontSize = 12.sp
                     )
 
@@ -333,7 +334,7 @@ private fun MorphDetailedFab() {
                                 Icon(
                                     icon,
                                     null,
-                                    tint = Color.DarkGray,
+                                    tint = Purple,
                                     modifier = Modifier.size(20.dp)
                                 )
                             }
