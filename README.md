@@ -150,10 +150,19 @@ Your ultimate <strong>Open-Source</strong> partner for crafting visually stunnin
       <strong>Animated Search Bar</strong>
     </td>
     <td align="center">
+		<img src="https://github.com/developerchunk/JetCo/blob/main/assets/images/fab_radial.gif?raw=true" alt="Radial FAB Variant" width="100%" style="border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.12);"/>
+		<br/><br/>
+		<strong>Radial FAB</strong>
     </td>
     <td align="center">
+		<img src="https://github.com/developerchunk/JetCo/blob/main/assets/images/fab_stack.gif?raw=true" alt="Stack FAB Variant" width="100%" style="border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.12);"/>
+		<br/><br/>
+		<strong>Stack FAB</strong>
     </td>
     <td align="center">
+		<img src="https://github.com/developerchunk/JetCo/blob/main/assets/images/fab_morph.gif?raw=true" alt="Morph FAB Variant" width="100%" style="border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.12);"/>
+		<br/><br/>
+		<strong>Morph FAB</strong>
     </td>
   </tr>
 </table>
